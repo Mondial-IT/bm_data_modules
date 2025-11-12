@@ -1,6 +1,6 @@
 <?php /** @noinspection PhpUnused */
 
-namespace bmDataModules\bm_import\src\Controller;
+namespace Drupal\bm_import\Controller;
 
 
 use Drupal;

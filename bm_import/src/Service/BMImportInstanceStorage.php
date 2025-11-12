@@ -5,9 +5,9 @@
    Created on 2024-12-17 at 5:25:34
  */
 
-namespace bmDataModules\bm_import\src\Service;
+namespace Drupal\bm_import\Service;
 
-use bmDataModules\bm_import\src\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImport;
 
 class BMImportInstanceStorage {
   protected ?BMImport $instance;

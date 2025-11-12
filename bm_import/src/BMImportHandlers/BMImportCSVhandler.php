@@ -1,9 +1,9 @@
 <?php
 
-namespace bmDataModules\bm_import\src\BMImportHandlers;
+namespace Drupal\bm_import\BMImportHandlers;
 
 use Drupal;
-use bmDataModules\bm_import\src\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImport;
 use Drupal\field\Entity\FieldConfig;
 use Exception;
 

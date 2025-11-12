@@ -5,11 +5,11 @@
    Created on 2024-12-16 at 11:25:57
  */
 
-namespace bmDataModules\bm_import\src\Form\Panel;
+namespace Drupal\bm_import\Form\Panel;
 
 use Drupal;
-use bmDataModules\bm_import\src\BMImport\BMImport;
-use bmDataModules\bm_import\src\BMImport\BMImportBatch;
+use Drupal\bm_import\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImportBatch;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\InvokeCommand;
@@ -161,7 +161,7 @@ class Panel_batch_processing extends FormBase {
   /**
    * @inheritDoc
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $input = $form_state->getUserInput();
     // note, usually we handle actions in the buildForm,
     // however this button, is not ajax'd and handled here.

@@ -5,10 +5,10 @@
    Created on 2024-12-16 at 11:20:36
  */
 
-namespace bmDataModules\bm_import\src\Form\Panel;
+namespace Drupal\bm_import\Form\Panel;
 
 use Drupal;
-use bmDataModules\bm_import\src\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImport;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Exception;

@@ -1,17 +1,17 @@
 <?php
 
-namespace bmDataModules\bm_import\src\BMImport;
+namespace Drupal\bm_import\BMImport;
 
-use bmDataModules\bm_import\src\BMImport\BMImport;
-use bmDataModules\bm_import\src\BMImport\BMImportCellHandler;
-use bmDataModules\bm_import\src\BMImport\BMImportCreator;
+use Drupal\bm_import\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImportCellHandler;
+use Drupal\bm_import\BMImport\BMImportCreator;
 use Drupal;
 use Drupal\bm_debug\BMDebugInfo\BMDebugInfo;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportFieldCreator;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportImagesHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportNodeHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportVocabularyHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportFieldCreator;
+use Drupal\bm_import\BMImportHandlers\BMImportImagesHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportNodeHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportVocabularyHandler;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityStorageException;

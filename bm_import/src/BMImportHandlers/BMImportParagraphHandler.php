@@ -4,7 +4,7 @@
  */
 /** @noinspection PhpPossiblePolymorphicInvocationInspection */
 
-namespace bmDataModules\bm_import\src\BMImportHandlers;
+namespace Drupal\bm_import\BMImportHandlers;
 
 use Drupal;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;

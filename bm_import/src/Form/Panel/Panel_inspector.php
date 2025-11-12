@@ -5,11 +5,11 @@
    Created on 2024-12-16 at 11:1:24
  */
 
-namespace bmDataModules\bm_import\src\Form\Panel;
+namespace Drupal\bm_import\Form\Panel;
 
 use Drupal;
-use bmDataModules\bm_import\src\BMImport\BMImport;
-use bmDataModules\bm_import\src\BMImport\BMImportInspector;
+use Drupal\bm_import\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImportInspector;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Form\FormBase;
@@ -106,7 +106,7 @@ class Panel_inspector extends FormBase{
   /**
    * @inheritDoc
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
    // bm_d('',traceColor(' trace: ' . __FUNCTION__ . ' panel_inspector ' . time()));
 
     $form_state->setRebuild(true);

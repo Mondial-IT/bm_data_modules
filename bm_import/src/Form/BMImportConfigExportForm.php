@@ -4,14 +4,14 @@
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
  */
 
-namespace bmDataModules\bm_import\src\Form;
+namespace Drupal\bm_import\Form;
 
 use Consolidation\SiteAlias\SiteAliasInterface;
 use Drupal;
 use Drupal\bm_import\BMExportConfigHandler\BMExportConfigHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportNodeHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportVocabularyHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportNodeHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportVocabularyHandler;
 use Drupal\Core\Config\ConfigImporter;
 use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\StorageComparer;
@@ -41,7 +41,7 @@ class BMImportConfigExportForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'bm_import_export_form';
   }
 

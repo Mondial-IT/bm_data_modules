@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - bm_xlsx
+id: bm_xlsx.overview
+label: 'Working with Excel uploads'

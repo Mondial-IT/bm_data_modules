@@ -1,0 +1,18 @@
+<h2>{% trans %}Upload and preview an Excel file{% endtrans %}</h2>
+<ol>
+  <li>{% trans %}Go to <strong>Configuration → Development → Excel upload</strong>.{% endtrans %}</li>
+  <li>{% trans %}Choose an <code>.xlsx</code> file from your computer and submit the form.{% endtrans %}</li>
+  <li>{% trans %}Select the worksheet you want to inspect. The preview displays the first rows with cell styling where available.{% endtrans %}</li>
+</ol>
+
+<h2>{% trans %}Share the data with other tools{% endtrans %}</h2>
+<ul>
+  <li>{% trans %}The selection is cached, allowing import modules to reuse the chosen sheet without re-uploading the file.{% endtrans %}</li>
+  <li>{% trans %}Use the color preview to confirm that important headers or warning rows remain styled in the source spreadsheet.{% endtrans %}</li>
+</ul>
+
+<h2>{% trans %}Troubleshooting{% endtrans %}</h2>
+<ul>
+  <li>{% trans %}If the upload fails, verify that the file extension is <code>.xlsx</code> and the file size does not exceed the site limit.{% endtrans %}</li>
+  <li>{% trans %}For corrupted files, download a fresh copy from the original source and try again.{% endtrans %}</li>
+</ul>

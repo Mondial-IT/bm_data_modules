@@ -1,15 +1,15 @@
 <?php
 
-namespace bmDataModules\bm_import\src\BMImport;
+namespace Drupal\bm_import\BMImport;
 
-use bmDataModules\bm_import\src\BMImport\BMImport;
-use bmDataModules\bm_import\src\BMImport\BMImportCreator;
+use Drupal\bm_import\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImportCreator;
 use Drupal;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportFieldCreator;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportNodeHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportVocabularyHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportYMLHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportFieldCreator;
+use Drupal\bm_import\BMImportHandlers\BMImportNodeHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportVocabularyHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportYMLHandler;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\node\Entity\NodeType;
 use Drupal\paragraphs\Entity\ParagraphsType;

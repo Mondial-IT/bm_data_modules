@@ -5,9 +5,9 @@
    Created on 2024-12-15 at 5:34:3
  */
 
-namespace bmDataModules\bm_import\src\BMImport;
+namespace Drupal\bm_import\BMImport;
 
-use bmDataModules\bm_import\src\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImport;
 use Drupal;
 use Exception;
 

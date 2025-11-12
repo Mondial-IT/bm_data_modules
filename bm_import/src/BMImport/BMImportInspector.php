@@ -1,11 +1,11 @@
 <?php
 
-namespace bmDataModules\bm_import\src\BMImport;
+namespace Drupal\bm_import\BMImport;
 
-use bmDataModules\bm_import\src\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImport;
 use Drupal;
 use Drupal\bm_debug\BMDebugInfo\BMDebugInfo;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportYMLHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportYMLHandler;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Render\Markup;
 use Drupal\node\Entity\Node;
@@ -386,7 +386,7 @@ bm_d('',$this->existingNodesMatchTable,'existingNodesMatchTable existingNodesMat
    *
    * @return BMImportInspector
    */
-  static public function get(BMImport $BMImport = NULL): BMImportInspector {
+  static public function get(?BMImport $BMImport = NULL): BMImportInspector {
     if (!isset(BMImportInspector::$instance)) {
       BMImportInspector::$instance = new BMImportInspector($BMImport);
     }

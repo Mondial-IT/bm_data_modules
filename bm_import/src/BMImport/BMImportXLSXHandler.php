@@ -1,8 +1,8 @@
 <?php
 
-namespace bmDataModules\bm_import\src\BMImport;
+namespace Drupal\bm_import\BMImport;
 
-use bmDataModules\bm_import\src\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImport;
 use Drupal;
 use Drupal\bm_xlsx\BMXLSX\BMXLSX;
 

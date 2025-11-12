@@ -4,10 +4,10 @@
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
  */
 
-namespace bmDataModules\bm_import\src\BMImportHandlers\unit;
+namespace Drupal\bm_import\BMImportHandlers\unit;
 
 use Drupal;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\node\Entity\Node;
 use Drupal\paragraphs\Entity\ParagraphsType;

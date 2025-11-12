@@ -1,16 +1,16 @@
 <?php /** @noinspection PhpPropertyOnlyWrittenInspection */
 
-namespace bmDataModules\bm_import\src\BMImport;
+namespace Drupal\bm_import\BMImport;
 
-use bmDataModules\bm_import\src\BMImport\BMImport_todo_before_import;
-use bmDataModules\bm_import\src\BMImport\BMImport_todo_with_columns;
-use bmDataModules\bm_import\src\BMImport\BMImport_todo_with_headers;
-use bmDataModules\bm_import\src\BMImport\BMImportActiveResult;
-use bmDataModules\bm_import\src\BMImport\BMImportInspector;
-use bmDataModules\bm_import\src\BMImport\BMImportXLSXHandler;
+use Drupal\bm_import\BMImport\BMImport_todo_before_import;
+use Drupal\bm_import\BMImport\BMImport_todo_with_columns;
+use Drupal\bm_import\BMImport\BMImport_todo_with_headers;
+use Drupal\bm_import\BMImport\BMImportActiveResult;
+use Drupal\bm_import\BMImport\BMImportInspector;
+use Drupal\bm_import\BMImport\BMImportXLSXHandler;
 use Drupal;
 use Drupal\bm_debug\BMDebugInfo\BMDebugInfo;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportYMLHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportYMLHandler;
 use Drupal\bm_listings\BMListings\BMListings;
 use Drupal\bm_taxonomies\BMTaxonomies\BMTaxonomies;
 use Drupal\bm_xlsx\BMXLSX\BMXLSX;

@@ -4,7 +4,7 @@
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
  */
 
-namespace bmDataModules\bm_import\src\Form;
+namespace Drupal\bm_import\Form;
 
 use Drupal;
 use Drupal\Core\Form\ConfigFormBase;
@@ -23,7 +23,7 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'bm_template_form';
   }
 

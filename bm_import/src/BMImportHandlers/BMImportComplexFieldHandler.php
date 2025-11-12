@@ -1,10 +1,10 @@
 <?php
 
-namespace bmDataModules\bm_import\src\BMImportHandlers;
+namespace Drupal\bm_import\BMImportHandlers;
 
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportNodeHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportVocabularyHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportNodeHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportVocabularyHandler;
 use Drupal;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageException;
@@ -24,17 +24,17 @@ class BMImportComplexFieldHandler {
   private bool $verbose;
 
   /**
-   * @var \bmDataModules\bm_import\src\BMImportHandlers\BMImportNodeHandler
+   * @var \Drupal\bm_import\BMImportHandlers\BMImportNodeHandler
    */
   private BMImportNodeHandler $nodeHandler;
 
   /**
-   * @var \bmDataModules\bm_import\src\BMImportHandlers\BMImportVocabularyHandler
+   * @var \Drupal\bm_import\BMImportHandlers\BMImportVocabularyHandler
    */
   private BMImportVocabularyHandler $vocabularyHandler;
 
   /**
-   * @var \bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler
+   * @var \Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler
    */
   private BMImportParagraphHandler $paragraphHandler;
 
