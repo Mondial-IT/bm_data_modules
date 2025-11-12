@@ -1,0 +1,6 @@
+services:
+  # creates an instance of instantiated BMImport which can be re-used
+  # $bmImport = \Drupal::service('bm_import.manager');
+  bm_import.manager:
+    class: Drupal\bm_import\Service\BMImportInstanceStorage
+    arguments: []

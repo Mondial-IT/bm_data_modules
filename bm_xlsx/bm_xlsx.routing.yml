@@ -1,0 +1,18 @@
+bm_xlsx.settings_form:
+  path: '/admin/config/system/bm-xlsx/settings'
+  defaults:
+    _title: 'bm xlsx - settings'
+    _form: 'Drupal\bm_xlsx\Form\SettingsForm'
+  requirements:
+    _permission: 'administer configuration'
+#
+# a clean (no page) form with upload excel, select worksheet
+# and display of the loaded Excel table
+# using cache as storage for settings.
+bm_xlsx.excel_upload_and_sheet_select_form:
+  path: '/bm-xlsx/xlsx-upload-and-sheet-select-form'
+  defaults:
+    _title: 'bm xlsx - Upload and Sheet select'
+    _form: 'Drupal\bm_xlsx\Form\ExcelUploadAndSheetSelectForm'
+  requirements:
+    _permission: 'administer configuration'

@@ -1,0 +1,286 @@
+importDefinition: adfiz
+csvSeparator: ;
+# $fieldTypes
+# 'text',
+# 'text_long',
+# 'integer',
+# 'decimal',
+# 'float',
+# 'boolean',
+# 'date',
+# 'entity_reference',
+# 'taxonomy_term_reference',
+# 'file',
+# 'image',
+# 'email',
+# 'link',
+# 'list_string',
+# 'list_integer',
+# 'list_float',
+# 'list_boolean',
+# 'list_text',
+# 'datetime',
+# 'geofield',
+file_identifier: adfiz
+
+groups:
+  - todo_before_import
+  - todo_with_headers
+  - todo_with_columns
+  - todo_after_import
+
+todo_before_import:
+  - name: create_vocabulary_type
+    vocabulary: financial_advisor_products
+    description: 'de categorieen van de financial advisors'
+
+  - name: create_paragraph_type
+    paragraph: finadvisors_listing_paragraph
+    description: 'listing paragraph with specific financial advisors information'
+
+  - name: create_node_fields
+    content_type: listing
+    fields:
+      - name: 'field_listing_business_paragraph'
+        type: entity_reference_revisions
+        description: 'Link to business paragraph'
+        references: business_paragraph
+
+      - name: 'field_unencoded_title'
+        type: string_long
+        description: 'The title in unencoded form'
+        multiple: false
+
+  - name: create_node_fields
+    content_type: contact
+    fields:
+      - name: 'field_unencoded_title'
+        type: string_long
+        description: 'The title in unencoded form'
+        multiple: false
+
+  - name: create_paragraph_fields
+    paragraph: finadvisors_listing_paragraph
+    fields:
+      - name: 'field_para_afm_registration'
+        description: 'Het afm registratie nummer'
+        type: text
+        multiple: false
+      - name: 'field_para_fa_licensenumber'
+        description: 'vergunningen nr'
+        type: text
+        multiple: true
+      - name: 'field_para_fa_products'
+        type: taxonomy_term_reference
+        description: 'De categorieen van deze adviseur'
+        references: 'financial_advisor_products'
+        multiple: false
+
+todo_with_headers:
+  - name: clean
+    replace:
+      - ':'
+      - ' '
+    uppercase: all
+
+todo_with_rows:
+  # this is used to find an existing entity. The more matches the better.
+  locateQueries:
+    - sql: >
+        select node.entity_id as nid
+        from node__field_listing_specifics_para as node
+        join paragraph__field_para_fa_licensenumber as para
+        on node.field_listing_specifics_para_target_id = para.entity_id
+        where para.field_para_fa_licensenumber_value = :AFM_NUMMER
+#    - sql: select entity_id as nid from paragraph__field_para_fa_licensenumber where field_para_fa_licensenumber_value = :AFM_NUMMER
+      variableKey: :AFM_NUMMER
+      csvColumn: 'AFM NUMMER'
+      message: License number in advisor paragraph
+
+    # try match on kvk number
+    #- sql: select entity_id as nid from paragraph__field_para_business_registration where field_para_business_registration_value = :KVK_NUMMER
+    - sql: >
+        select node.entity_id as nid
+        from node__field_p_business_information as node
+        join paragraph__field_para_business_registration as para
+        on node.field_p_business_information_target_id = para.entity_id
+        where para.field_para_business_registration_value = :KVK_NUMMER
+      variableKey: :KVK_NUMMER
+      csvColumn: 'KVK NUMMER'
+      message: chamber of commerce number in business paragraph
+    # select entity_id as nid from paragraph__field_para_business_vat_number where paragraph__field_para_business_vat_number= :BTW_NUMMER
+    # try matching phone
+    - sql: >
+        select entity_id as nid
+        from node__field_listing_phone
+        WHERE REGEXP_REPLACE(field_listing_phone_value, '[^0-9]', '') = REGEXP_REPLACE(:TELEFOON, '[^0-9]', '')
+
+      # where field_listing_phone_value = :TELEFOON
+      variableKey: :TELEFOON
+      csvColumn: TELEFOON
+      message: Phonenumber in listing phone field
+
+    # try a match on the last 9 digits of the phone number
+    - sql: select entity_id as nid from node__field_listing_phone where SUBSTRING(field_listing_phone_value, -9) = SUBSTRING(:TELEFOON, -9)
+      variableKey: :TELEFOON
+      csvColumn: TELEFOON
+
+# mandatory format
+#     node_paragraph_fields:
+#      - field: field_p_contact_address
+#        paragraph:
+#          name: paragraph_address
+#          fields:
+
+todo_with_columns:
+  - node_create:
+      type: listing
+      name: TITEL
+      field: title
+
+    node_fields:
+      - name: MISSINGFIELD
+
+      - name: _CANVASS
+        field: field_listing_canvas_tags
+        action: append id
+
+      - name: _ETL
+        field: field_listing_etl_sheetname
+
+      - name: _LOCATION
+        field: field_listing_location
+        value: 5182
+        # haarlem
+        # 4401 amersfoort
+      - name: _CATEGORY
+        field: field_listing_category
+        value: 988
+        # adviesbureaux
+
+      - name: OMSCHRIJVING
+        field: body
+        format: full_html
+
+      #- name: OMSCHRIJVING
+      #  field:  field_listing_tagline
+      #- name: KANTOOR
+      #  field: description
+      #  action: append
+      - name: STREET
+        field: field_listing_street
+
+      - name: ADRES
+        field: field_listing_address
+
+      - name: POSTALCODE
+        field: field_listing_postcode
+
+      - name: STAD
+        field: field_listing_city
+
+      - name: PHOTO
+        field: field_listing_image
+        action: upload_image
+        # and put in gallery as well
+      #- name: _auto_chain
+      #  field: field_listing_gallery
+
+
+      - name: GALLERY
+        field: field_listing_gallery
+        action: upload_image
+
+        #- name: STAD
+        # needs lookup googleplace or osm
+        #field: field_listing_province
+        #value: "Utrecht"
+
+        # special this awaits creation of
+        # node contact (identified by id in contact
+        # action await tells, wait for node create with
+        # this id and fill it when available into this node.
+      - name: __contact
+        action: await
+        #field: field_test_contact
+      - name: TELEFOON
+        field: field_listing_phone
+      - name: DOMAIN
+        field: field_listing_website
+
+    node_paragraph_fields:
+      - field: field_listing_business_paragraph
+        paragraph:
+          name: business_paragraph
+          fields:
+            - name: KVK NUMMER
+              field: field_para_business_registration
+
+      - field: field_listing_specifics_para
+        paragraph:
+          name: finadvisors_listing_paragraph
+          fields:
+            - name: PRODUCTEN
+              field: 	field_para_fa_products
+              action: add term
+              taxonomy: financial_advisor_products
+              # empty means expected from row
+              # a value means set this term (label)
+              term:
+              termLanguageId: nl
+            - name: HAARLEM AFSTAND
+              field: field_para_haarlem_distance
+            - name: AMERSFOORT AFSTAND
+              field: field_para_amersfoort_distance
+            - name: AFM NUMMER
+              field: field_para_afm_registration
+            - name: VERGUNNINGEN
+              field: field_para_fa_licensenumber
+            #        - name: ADFIZURL
+            #          field: todo
+
+  # - name: PHOTO
+  - node_create:
+      # used by listing to signal it reference this
+      # notice the __ there need to be 2 _ for this to be correct
+      id: __contact
+      type: contact
+      name: NAAM
+      field: title
+      # - name: TITEL
+    node_fields:
+      - name: OMSCHRIJVING
+        field: body
+        format: full_html
+    # _auto_chain means, set a field with a value
+    # somewhere else due a given field value
+    # when column header is BEZOEK ADRES
+    # we must set adres and type of address to 'visiting address'
+    # -auto_chain does that
+    node_paragraph_fields:
+      - field: field_p_contact_address
+        paragraph:
+          name: paragraph_address
+          fields:
+            - name: BEZOEK ADRES
+              field: field_para_address_unstructured
+            - name: _auto_chain
+              field: field_para_address_type
+              value: visiting address
+    # add #n for next
+    node_paragraph_fields#2:
+      - field: field_p_contact_address
+        paragraph:
+          name: paragraph_address
+          fields:
+            - name: POST ADRES
+              field: field_para_address_unstructured
+            - name: _auto_chain
+              field: field_para_address_type
+              value: postal address
+
+    paragraph_paragraph:
+      field:
+
+todo_after_import:
+  - name: niets

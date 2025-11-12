@@ -1,0 +1,5 @@
+name: Blue Marloc Excel API
+type: module
+description: 'bm_xlsx - Provides functionality of Excel'
+package: Blue Marloc
+core_version_requirement: ^11

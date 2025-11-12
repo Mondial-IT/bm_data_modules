@@ -1,0 +1,166 @@
+#file: noinspection spellcheckinginspection
+importdefinition: hubspot
+csvseparator: ";"
+
+groups:
+  - todo_before_import
+  - todo_with_headers
+  - todo_with_columns
+  - todo_after_import
+
+# this creates fields on entities
+# this creates paragraph types
+
+todo_before_import:
+
+  # fieldtypes
+  # 'string' or 'string(200)' plain text field
+  # 'text',       html field
+  # 'text_long',  html field
+  # 'string_long'
+
+  # 'integer',
+  # 'decimal',
+  # 'float',
+  # 'boolean',
+  # 'date',
+  # 'entity_reference',         -name, type, references, description
+  # 'taxonomy_term_reference',
+  # 'file',
+  # 'image',
+  # 'email',
+  # 'link',
+  # 'list_string',
+  # 'list_integer',
+  # 'list_float',
+  # 'list_boolean',
+  # 'list_text',
+  # 'datetime',
+  # 'geofield',
+
+  - name: create_node_fields
+    content_type: listing
+    fields:
+      - name: field_listing_hubspot_id
+        type: string
+
+      - name: field_listing_hubspot_contact_id
+        type: string
+
+      - name: field_listing_hubspot_deal_id
+        type: string
+
+      - name: field_listing_hubspot_updated
+        type: timestamp
+
+todo_with_headers:
+  - name: clean
+    replace:
+      - ':'
+      - ' '
+    uppercase: all
+
+todo_with_rows:
+
+#--------------------------------------------------
+# todo_with_columns
+#
+# create a listing based on the title column, fills field title
+# - node_create:
+#    type: listing
+#    name: titel
+#    field: title
+
+# node_fields:
+# node_paragraph_fields:
+
+# create a contact entity
+
+# - node_create
+#  id: __contact   the id __contact is referenced in the columns to link listing and contact
+#                 note the __ which is mandatory for id's.
+#  type: contact
+#  name: naam
+#  field: title
+
+# field definitions
+# - name: column label
+#   field: field machine name
+#   value: when present a 'static value' which overrides the csv, or when missing in the csv
+#   format: full_html  setting for a rich text field
+#   action: add term                      // optional signal adding a term to field, but as well in taxonomy
+#   taxonomy: financial_advisor_products  // the taxonomy
+#   term: dienst verlenings document      // the term name
+#   termlanguageid: nl                    // the term language id
+#                                         // note we do not support the other taxo fields a.t.m.
+
+# specials
+# the import adds fields to the csv
+# like _canvass, _etl, _location, _category
+#
+# action: append id
+# appends the id of cell _canvass to the field
+# the csv contains a target_id which is added without duplicating it.
+
+# - name: _canvass
+#  field: field_listing_canvas_tags
+#  action: append id
+
+# action: add term
+#, add existing terms to a term reference field
+#   name: column label
+#   field: machine name of field
+#   action: add term
+#   taxonomy: vid
+#   term: term name
+#   termlanguageid: nl
+
+# action: await
+#   this awaits creation of the node 'contact'
+#  (identified by id: __contact in contact
+#   action await tells: wait for node create with
+#   this id and when it is there,
+#   set it to field_test_contact
+
+# node listing:
+# - name: __contact
+#   action: await
+#   field: field_test_contact
+
+# in create node contact
+# - node_create
+#   id: __contact
+#   ...
+
+
+# _auto_chain means: set a field with a value
+#   somewhere else ... due to a given field value
+#   example when column header is bezoek adres
+#   we must set adres and type of address to 'visiting address'
+#   -auto_chain says continue with next line for this cell
+
+# content of cell adres is placed in street, address and postcode
+#- name: adres
+#  field: field_listing_street
+#- name: _auto_chain
+#  field: field_listing_address
+#- name: _auto_chain
+#  field: field_listing_postcode
+
+todo_with_columns:
+
+  - node_fields:
+
+      - name: field_listing_hubspot_id
+      - field: field_listing_hubspot_id
+
+      - name: field_listing_hubspot_contact_id
+      - field: field_listing_hubspot_contact_id
+
+      - name: field_listing_hubspot_deal_id
+      - field: field_listing_hubspot_deal_id
+
+      - name: field_listing_hubspot_updated
+        field: field_listing_hubspot_updated
+
+todo_after_import:

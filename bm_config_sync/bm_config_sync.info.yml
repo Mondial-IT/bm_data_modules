@@ -1,0 +1,7 @@
+name: 'Blue Marloc Config Sync'
+type: module
+description: 'A module to compare and synchronize configuration UUIDs between two directories.'
+core_version_requirement: ^11
+package: Mondial-IT
+dependencies:
+  - drupal:config

@@ -1,0 +1,320 @@
+#file: noinspection SpellCheckingInspection
+importDefinition: cdr
+csvSeparator: ";"
+#
+#id: "66d87450e90cc756e5de1358"
+#date: "2024-09-04T14:53:04.197Z"
+#direction: "outbound"
+#
+#externalNumber:
+#  anonymous: false
+#  localized: "076 503 8474"
+#  e164: "+31765038474"
+#  isOnClientBlacklist: false
+#  isOnGlobalBlacklist: false
+#
+#internalNumber:
+#  id: null
+#  label: null
+#  localizedNumber: "+31 74 234 0888"
+#  number: "+31742340888"
+#
+#duration: 71
+#status: "ANSWERED"
+#missedReason: null
+#menuOption: null
+#
+#user:
+#  id: "6658359f1ca449b2112bc9a2"
+#  initials: "AV"
+#  firstName: "Arthur"
+#  lastName: "van der Leer"
+#  fullName: "Arthur van der Leer"
+#
+#phoneNumber:
+#  availability: "AVAILABLE"
+#
+#avatarUrls:
+#  contact: null
+#  voicemail: null
+#
+#callRecording:
+#  id: "66d87450e90cc756e5de1359"
+#  availableUntil: "2024-12-03T15:54:15.461Z"
+#  playUrl: "https://api.rinkel.com/v1/call-recordings/66d87450e90cc756e5de1359/stream"
+#
+#notes: []
+#
+#insights:
+#  status: "AVAILABLE"
+#  summary: "In dit telefoongesprek tussen Arthur van der Leer en een klant, probeert Arthur informatie te geven over energieoplossingen voor zonnepanelen. De klant, die de telefoon aan haar moeder geeft, toont echter geen interesse in de aangeboden diensten en geeft aan dat ze al geregeld zijn."
+#  customSummary: null
+#  sentiment: "NEGATIVE"
+#
+#topics:
+#  - "problemen"
+#  - "interesse"
+#  - "energie"
+#  - "zonnepanelen"
+
+groups:
+  - todo_before_import
+  - todo_with_headers
+  - todo_with_columns
+  - todo_after_import
+
+# this creates fields on entities
+# this creates paragraph types
+
+todo_before_import:
+
+# fieldTypes
+# 'string' or 'string(200)' plain text field
+# 'text',       html field
+# 'text_long',  html field
+# 'string_long'
+
+# 'integer',
+# 'decimal',
+# 'float',
+# 'boolean',
+# 'date',
+# 'entity_reference',         -name, type, references, description
+# 'taxonomy_term_reference',
+# 'file',
+# 'image',
+# 'email',
+# 'link',
+# 'list_string',
+# 'list_integer',
+# 'list_float',
+# 'list_boolean',
+# 'list_text',
+# 'datetime',
+# 'geofield',
+
+
+  # CREATE NODE_TYPE
+  - name: create_node_type
+    label: Call Detail Record
+    content_type: call_detail_record
+    description: 'Call detail record information'
+
+#
+# @see BMImport_todo_before_import.php
+# CREATE NODE FIELDS
+  - name: create_node_fields
+    content_type: call_detail_record
+    fields:
+      - name: field_cdr_id
+        type: string
+
+      - name: field_cdr_date # "2024-09-04T14:53:04.197Z"
+        type: date_time
+
+      - name: field_cdr_direction # : "outbound"
+        type: string
+
+      - name: field_cdr_extNumber_anonymous # : false
+        type: string
+
+      - name: field_cdr_extNumber_localized # : "076 503 8474"
+        type: string
+
+      - name: field_cdr_extNumber_e164 # : "+31765038474"
+        type: string
+
+      - name: field_cdr_extNumber_isOnClientBlacklist # : false
+        type: string
+
+      - name: field_cdr_extNumber_isOnGlobalBlacklist # : #  false
+        type: string
+
+      - name: field_cdr_intNumber_id # : null
+        type: string
+
+      - name: field_cdr_intNumber_label # : null
+        type: string
+
+      - name: field_cdr_intNumber_localNumber # : "+31 74 234 0888"
+        type: string
+
+      - name: field_cdr_intNumber_number # : "+31742340888"
+        type: string
+
+      - name: field_cdr_duration # : 71
+        type: string
+
+      - name: field_cdr_status # : "ANSWERED"
+        type: string
+
+      - name: field_cdr_missedReason # : null
+        type: string
+
+      - name: field_cdr_menuOption # : null
+        type: string
+
+      - name: field_cdr_user_id # : "6658359f1ca449b2112bc9a2"
+        type: string
+
+      - name: field_cdr_user_initials # : "AV"
+        type: string
+
+      - name: field_cdr_user_firstName # : "Arthur"
+        type: string
+
+      - name: field_cdr_user_lastName # : "van der Leer"
+        type: string
+
+      - name: field_cdr_user_fullName # : "Arthur van der Leer"
+        type: string
+
+      - name: field_cdr_phoneNumber # :
+        type: string
+
+      - name: field_cdr_availability # : "AVAILABLE"
+        type: string
+
+      - name: field_cdr_avatarUrls # :
+        type: string
+
+      - name: field_cdr_contact # : null
+        type: string
+
+      - name: field_cdr_voicemail # : #  null
+        type: string
+
+      - name: field_cdr_callRecording # :
+        type: string
+
+      - name: field_cdr_callRecord_id # : "66d87450e90cc756e5de1359"
+        type: string
+
+      - name: field_cdr_callRecord_availUntil # : "2024-12-03T15:54:15.461Z"
+        type: string
+
+      - name: field_cdr_callRecord_playUrl # : "https://api.rinkel.com/v1/call-recordings/66d87450e90cc756e5de1359/stream"
+        type: string_long
+
+      - name: field_cdr_notes # : []
+        type: string
+
+      - name: field_cdr_status # : "AVAILABLE"
+        type: string
+
+      - name: field_cdr_summary # : "In dit telefoongesprek tussen Arthur van der Leer en een klant, probeert Arthur informatie te geven over energieoplossingen voor zonnepanelen. De klant, die de telefoon aan haar moeder geeft, toont echter geen interesse in de aangeboden diensten en geeft aan dat ze al geregeld zijn."
+        type: string_long
+
+      - name: field_cdr_customSummary # : null
+        type: string_long
+
+      - name: field_cdr_sentiment # : "NEGATIVE"
+        type: string
+
+      - name: field_cdr_topics # :
+        type: taxonomy_term_reference
+        multiple: true
+
+
+todo_with_headers:
+  - name: clean
+    replace:
+      - ':'
+      - ' '
+    uppercase: all
+
+todo_with_rows:
+
+#--------------------------------------------------
+# todo_with_columns
+#
+# create a listing based on the TITLE column, fills field title
+# - node_create:
+#    type: listing
+#    name: TITEL
+#    field: title
+
+# node_fields:
+# node_paragraph_fields:
+
+# create a Contact entity
+
+# - node_create
+#  id: __contact   the id __contact is referenced in the columns to link listing and contact
+#                 note the __ which is mandatory for id's.
+#  type: contact
+#  name: NAAM
+#  field: title
+
+# field definitions
+# - name: COLUMN LABEL
+#   field: field machine name
+#   value: When present a 'static value' which overrides the csv, or when missing in the csv
+#   format: full_html  setting for a rich text field
+#   action: add term                      // optional signal adding a term to field, but as well in taxonomy
+#   taxonomy: financial_advisor_products  // the taxonomy
+#   term: Dienst verlenings document      // the term name
+#   termLanguageId: nl                    // the term language id
+#                                         // note we do not support the other taxo fields a.t.m.
+
+# SPECIALS
+# the import adds fields to the csv
+# like CANVASS, ETL, LOCATION, CATEGORY
+#
+# action: append id
+# appends the id of cell CANVASS to the field
+# the csv contains a target_id which is added without duplicating it.
+
+# - name: CANVASS
+#  field: field_listing_canvas_tags
+#  action: append id
+
+# action: add term
+#, add existing terms to a term reference field
+#   name: COLUMN LABEL
+#   field: machine name of field
+#   action: add term
+#   taxonomy: vid
+#   term: Term name
+#   termLanguageId: nl
+
+# action: await
+#   This awaits creation of the node 'contact'
+#  (identified by id: __contact in contact
+#   Action await tells: wait for node create with
+#   this id and when it is there,
+#   set it to field_test_contact
+
+# node listing:
+# - name: __contact
+#   action: await
+#   field: field_test_contact
+
+# in create node contact
+# - node_create
+#   id: __contact
+#   ...
+
+
+# _auto_chain means: set a field with a value
+#   somewhere else ... due to a given field value
+#   Example when column header is BEZOEK ADRES
+#   we must set adres AND type of address to 'visiting address'
+#   -auto_chain says continue with next line for this cell
+
+# content of cell ADRES is placed in street, address and postcode
+#- name: ADRES
+#  field: field_listing_street
+#- name: _auto_chain
+#  field: field_listing_address
+#- name: _auto_chain
+#  field: field_listing_postcode
+
+
+
+
+
+todo_with_columns:
+
+
+todo_after_import:

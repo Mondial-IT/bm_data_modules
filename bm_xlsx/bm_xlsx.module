@@ -1,0 +1,46 @@
+<?php
+
+/*
+ Copyright (c) Mondial-IT BV - Blue Marloc 2024
+   Created on 2024-11-21 at 11:32:11
+ */
+function bm_xlsx_help($route_name, $route_match): string {
+  if ($route_name == 'help.page.bm_xlsx') {
+    return
+      '<p>Blue Marloc Excel interface</p>
+    <p>
+      <h3>class BMXLSX</h3>
+      <ul>
+      <li>__construct([file_path_or_fid: int|string = 0])</li>
+      <li>getFileUri(): null|string</li>
+      <li>getXLSX(): array|null|SimpleXLSX</li>
+      <li>getRowsKeyed([workSheetIndex = null], [limit = null]): array|null</li>
+      <li>getRows([workSheetIndex = null], [limit = null]): array|null</li>
+      <li>getRowHeader([workSheetIndex = null]): array|null</li>
+      <li>getRowsWithoutHeader([workSheetIndex = null], [limit = null]): array|null</li>
+      <li>getSheetNames(): array|null</li>
+      <li>getColors(sheet, [rowStart: int|null = null], [rowEnd: int|null = null], [columnIndex: int|null = null]): array|null</li>
+      <li>cache_config_sheet_selection_and_limit(sheet: string, limit): void</li>
+      <li>get_config_sheet_selection_and_limit(): stdClass</li>
+      <li>get_current_sheet(): int|null</li>
+      <li>get_current_limit(): int|null</li>
+      <li>save_as_excel(data: array, uri: string): string</li>
+      </ul>
+      </p>';
+  }
+  return "";
+}
+
+function bm_xlsx_theme(): array {
+  $module_path = \Drupal::service('extension.path.resolver')->getPath('module', 'bm_xlsx');
+  return [
+    'page__bm_xlsx__xlsx_upload_and_sheet_select_form' => [
+      'variables' => [
+        'variable1' => NULL,
+        'variable2' => NULL,
+      ],
+      'template' => 'page--bm-xlsx--xlsx-upload-and-sheet-select-form',
+      'path' => $module_path . '/templates',
+    ],
+  ];
+}

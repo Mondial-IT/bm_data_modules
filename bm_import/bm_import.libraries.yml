@@ -1,0 +1,7 @@
+bm_import:
+  version: 1.x
+  css:
+    theme:
+      css/bm_import.css: {}
+  js:
+    js/bm_import.js: {}

@@ -1,0 +1,9 @@
+bm_xlsx:
+  version: 1.x
+  css:
+    theme:
+      css/bm_xlsx.css: {}
+  js:
+    js/bm_xlsx.js: {}
+
+    js/excel-upload-and-sheet-select-form.js: {}

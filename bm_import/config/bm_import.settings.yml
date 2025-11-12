@@ -1,0 +1,1108 @@
+#file: noinspection SpellCheckingInspection
+importDefinition: JIGGR
+csvSeparator: ";"
+
+#  CANVASS
+# ETL
+# LOCATION
+# CATEGORY
+# Selma Sort order
+# duplicate
+# bedrijfsnaam
+# straat
+# huisnummer
+# postcode
+# stad
+# geocode adres
+# adres
+# provincie
+# lat
+# lon
+# kadasterlink
+# confidence
+# has solar
+# website
+# telefoon
+# telefoon2
+# email
+# kvk
+# bedrijfsvorm
+# opgericht
+# btw
+# sbi
+# Bedrijfssoort
+# sbi description
+# sbi beschrijving
+# KvK Medewerkers
+# LinkedIn Medewerkers
+# handelsnamen
+# linkedin
+# facebook
+# twitter
+# werknemer 0
+# werknemer 0 titel
+# werknemer 1
+# werknemer 1 titel
+# werknemer 2
+# werknemer 2 titel
+
+
+groups:
+  - todo_before_import
+  - todo_with_headers
+  - todo_with_columns
+  - todo_after_import
+
+# this creates fields on entities
+# this creates paragraph types
+
+todo_before_import:
+
+  # fieldTypes
+  # 'string' or 'string(200)' plain text field
+  # 'text',       html field
+  # 'text_long',  html field
+  # 'integer',
+  # 'decimal',
+  # 'float',
+  # 'boolean',
+  # 'date',
+  # 'entity_reference',         -name, type, references, description
+  # 'taxonomy_term_reference',
+  # 'file',
+  # 'image',
+  # 'email',
+  # 'link',
+  # 'list_string',
+  # 'list_integer',
+  # 'list_float',
+  # 'list_boolean',
+  # 'list_text',
+  # 'datetime',
+  # 'geofield',
+
+  #
+  # @see BMImport_todo_before_import.php
+  #
+  # CREATE VOCABULARY TYPE format
+  - name: create_vocabulary_type
+    vocabulary: financial_advisor_products
+    description: 'de categorieen van de financial advisors'
+
+  - name: create_paragraph_type
+    paragraph: finadvisors_listing_paragraph
+    description: 'listing paragraph with specific financial advisor information'
+
+  - name: create_vocabulary_type
+    vocabulary: listing_sbi_codes
+    label: Listing SBI codes
+    description: 'Standard Bedrijfsindeling codes'
+  #
+  # CREATE VOCABULARY FIELDS
+
+  - name: create_vocabulary_fields
+    vocabulary: listing_sbi_codes
+    fields:
+      - name: field_term_icon
+        type: string
+        value: la la-golf-ball
+        description: 'Icon for this taxonomy'
+      - name: field_term_color
+        type: string
+        value: green
+        description: 'Color for this taxonomy'
+
+  # CREATE PARAGRAPH TYPE
+  - name: create_paragraph_type
+    paragraph: address_paragraph
+    label: Address paragraph
+    translatable: false
+    # icon: path to ico (DOES NoT WORK YET)
+    description: 'listing paragraph with specific address information'
+
+  # CREATE PARAGRAPH FIELDS example
+  #    - name: create_paragraph_fields
+  #      paragraph: address_paragraph
+  #      label:                           // optional
+  #      icon: data:.. base 64            // optional
+  #      translatable: true               // optional
+  #      description:                     // optional
+  #      fields:
+  #        - name: 'field_para_address_unstructured'
+  #          type: string|text_long|float
+  #          description: 'Address'       // optional
+  #          multiple: true               // optional
+  #        - name: 'field_para_address_type'
+  #          type: string
+  #          description: 'Address type'  // optional
+
+  - name: create_paragraph_type
+    paragraph: business_paragraph
+    label: listing Business paragraph
+    # icon: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAMAAADVRocKAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAzUExURQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKMFRskAAAAQdFJOUwAQIDBAUGBwf4+fr7/P3+8FUYRsAAAACXBIWXMAAA7DAAAOwwHHb6hkAAADS0lEQVRoQ+2Z65KjIBCFh+A1asz7P+3QFwUaiJDpVG1t5fuzBuf0UWya1v358uU/xth+sHz8Acy8P4GZf2vTbRjesXU8pMqNLh/ZbzyoycLBkZUHFek5NDPwsB4zR2YWHtYjmiH3FHhYj+ARIzysx5mjxMbDeohncOdhPT6eRfEcbYZH/4qZtudjwfpmODawa1W8jnMHy5t90A8Xv8ezf2c4c5NKwx2P91VrfmyQ+1x8+nG0WuGj8vmJ8mbE0tJ2MKL4qDsk8ZUdRGUgFB1GDilQc/ALQKDkEC4A4FzCSg4y/mpoCSMKDnIBQOUMHDyP+1vdi1wAD4ySdXirP5Lxd+7i8g5vbGxiAfjKnHVoby7kAgi2xpxDs4ERCRQ10hmH5v5LTJBo1JP60b51rqwkkq1riDJ4X9uTKFiziq1DQGTwnPVfA+QsL9rvMjcO7NmUezjRISK6M9XHj4FYtDotpI9zlRj5pA524rABqvfgSG5D/6VM3Ib+S5kjvI2PGIS38SEDV8C1DIx1rXnfJfWtbFBS5LDuTYlZp3jdFgxeKFKsKHFRN5I1eKmQHJ+ZQoKdLGNwoRAcbcq+LfO8HHnp95rU4EoRc6Patg7Hed4Vz5YqMbhURBi8gC0qZVRPH/xLGlwrIrATkXs7xeAuVxpcK0Jwe7mns4dRaCsTBhWKAOyjs08HTlDI2KBGEQB9Yr53wrDTeeQgcY0iAFwLCQxFDmPGBjUKj4Wh3O06sEmFxIsMqhQeuN/iRgVPDXIxMqhSeGBFylk7GThWZFCl8EDyFjs3aMFg6UQGVQoPrL9iGYTAEDQyqFJ4QMeHGfjsYYDXBgfwb57kbPrYA84bptpGs1unOIGkLs4oZCR+feVuFRuvOsUJ5ESxJYS4VL1wBdHfVSoOQFnM6iAjTd/xvNQqmPSxewxMfTIbrQoYKqwbuNb4iSGNCqyN2azAwpKJ1KqAC8p9qMd9PVvVGhVQPnJPDduebLq0KsA32Uvp+9OSL8uNCvr4FL9J0n/IlfqcVsXR5RxvSKbDS3zxFaJVcX5AW+7TPK+QC46tWHHeUMi3e8dcmB+mVWHxEXnWy480zYpuool1bPNleKBdceuHaRy7qr8l2hVfvvw7/Pz8Arhwcer2qgUpAAAAAElFTkSuQmCC
+    translatable: true
+    description: Paragraph with detailed business information
+
+  - name: create_paragraph_type
+    paragraph: infrastructure_paragraph
+    label: listing infrastructure paragraph
+    # icon: earth.png
+    description: Paragraph with detailed information on infrastructure
+
+  - name: create_paragraph_fields
+    paragraph: infrastructure_paragraph
+    fields:
+      - name: field_para_listing_has_solar
+        type: string
+        description: 'Indication of having solar panels'
+
+  - name: create_paragraph_type
+    paragraph: place_listing_paragraph
+    label: listing google places details
+    # icon:
+    translatable: true
+    description: Paragraph with detailed google places information
+
+  - name: create_paragraph_fields
+    paragraph: place_listing_paragraph
+    fields:
+      - name: field_para_place_google_maps_uri
+        type: string
+
+      - name: field_para_place_json
+        type: text_long
+
+      - name: field_para_place_nationalphonenr
+        type: string
+
+      - name: field_para_place_review
+        type: text_long
+        multiple: true
+
+      - name: field_para_place_user_rating
+        type: string
+
+      - name: field_para_place_viewprt_ne_lat
+        type: float
+
+      - name: field_para_place_viewprt_ne_lng
+        type: float
+
+      - name: field_para_place_viewprt_sw_lat
+        type: float
+
+      - name: field_para_place_viewprt_sw_lng
+        type: float
+
+  - name: create_paragraph_fields
+    paragraph: business_paragraph
+    fields:
+      - name: 'field_para_business_sbi_code'
+        type: string
+        description: 'SBI code'
+      #        123445678901234578901234567890123
+      - name: 'field_para_business_sbihierarchy'
+        vocabulary: listing_sbi_codes
+        description: 'SBI code hierarchy'
+        multiple: true
+
+  # CREATE NODE_TYPE
+  - name: create_node_type
+    label: Contact
+    content_type: contact
+    description: 'Contact detail information'
+
+  #
+  # @see BMImport_todo_before_import.php
+  # CREATE NODE FIELDS
+  #  - name: create_node_fields
+  #    content_type: listing
+  #    fields:
+  #      - name: 'field_unencoded_title'
+  #        type: string_long
+  #        description: 'The title in unencoded form'
+  #        multiple: false
+
+  - name: create_node_fields
+    content_type: listing
+    fields:
+      - name: 'field_listing_business_paragraph'
+        type: entity_reference_revisions
+        description: 'Link to business paragraph'
+        references: business_paragraph
+
+      - name: 'field_unencoded_title'
+        type: string_long
+        description: 'The title in unencoded form'
+        multiple: false
+
+      # Example NODE ref on NODE
+      # reference contact nodes
+      - name: 'field_listing_contacts'
+        contentType: contact
+        description: 'This listing has contacts with '
+        multiple: true
+
+      - name: field_listing_phone2
+        type: string
+        description: 'Alternative phonenumber'
+
+      - name: field_listing_phone3
+        type: string
+        description: 'Alternative phonenumber'
+
+      - name: field_listing_phone4
+        type: string
+        description: 'Alternative phonenumber'
+
+      - name: field_listing_business_type
+        type: string
+        description: 'Business type'
+
+      - name: field_listing_has_solar
+        type: string
+        description: 'The company has solar panels'
+
+      - name: field_listing_vat_no
+        type: string
+        description: 'Company VAT number'
+
+      - name: field_listing_employees
+        type: string
+        description: 'No of employees'
+
+      - name: field_listing_sbi_code
+        type: string
+        description: 'SBI Code'
+
+      - name: field_listing_sbi_hierarchy
+        description: 'SBI code hierarchy'
+        vocabulary: listing_sbi_codes
+        multiple: true
+
+      - name: field_listing_coc_no
+        type: string
+        description: 'Chambre of commerce registration'
+
+      - name: field_listing_city
+        type: string
+        description: 'Stad'
+
+      - name: field_listing_housenumber
+        type: string
+        description: 'House no.'
+
+      - name: field_listing_country
+        type: string
+        description: 'Country'
+
+      - name: 'field_listing_business_paragraph'
+        description: 'Link to business paragraph'
+        paragraphType: business_paragraph
+
+      - name: 'field_listing_address_paragraph'
+        description: 'Link to address paragraph'
+        paragraphType: address_paragraph
+
+  #  - name: create_paragraph_fields
+  #    paragraph: address_paragraph_x
+  #    fields:
+  #      - name: 'field_para_address_unstructured'
+  #        type: string
+  #        description: 'Address'
+  #
+  #  - name: create_paragraph_fields
+  #    paragraph: places_paragraph_x
+  #    fields:
+  #      - name: 'field_para_place_nationalphonenr'
+  #        type: string
+  #        description: 'National phonenumber'
+
+  #
+  #  - name: _create_node_fields
+  #    content_type: contact
+  #    fields:
+  #      - name: 'field_unencoded_title'
+  #        type: string_long
+  #        description: 'The title in unencoded form'
+  #        multiple: false
+  #
+  - name: _create_paragraph_fields
+    paragraph: finadvisors_listing_paragraph
+    fields:
+      - name: 'field_para_afm_registration'
+        description: 'Het afm registratie nummer'
+        type: text
+        multiple: false
+      - name: 'field_para_fa_licensenumber'
+        description: 'vergunningen nr'
+        type: text
+        multiple: true
+      - name: 'field_para_fa_products'
+        type: taxonomy_term_reference
+        description: 'De categorieen van deze adviseur'
+        references: 'financial_advisor_products'
+        multiple: false
+
+  - name: _create_paragraph_fields
+    paragraph: business_paragraph
+    fields:
+      - name: field_para_business_sbihierarchy
+        type: taxonomy_entity_reference
+        description: 'SBI hierarchy'
+        references: 'listing_sbi_codes'
+        multiple: true
+# nothing to do here
+
+
+
+
+# what actions or conversions should be done on the headers
+todo_with_headers:
+  - name: clean
+    replace:
+      - ':'
+      - ' '
+    uppercase: all
+
+todo_with_rows:
+  # this is used to find an existing entity in the inspector featur.
+  # The more matches the better.
+  locateQueries:
+    # on field_listing_place_id
+    # on field_listing_phone
+    # on title
+    # on field_listing_street
+    # on field_listing_address
+
+    - sql: SELECT entity_id AS nid FROM node__field_listing_phone WHERE REGEXP_REPLACE(field_listing_phone_value, '\\D', '') = REGEXP_REPLACE(:TELEFOON, '\\D', '');
+      variableKey: :TELEFOON
+      csvColumn: TELEFOON
+    #
+    # SELECT entity_id AS nid FROM node__field_listing_phone WHERE REGEXP_REPLACE(field_listing_phone_value, '[^0-9]', '') = REGEXP_REPLACE(:TELEFOON, '[^0-9]', '');
+    - sql: SELECT entity_id AS nid FROM node__field_listing_phone WHERE REGEXP_REPLACE(field_listing_phone_value, '\\D', '') = REGEXP_REPLACE(:TELEFOON, '\\D', '');
+      variableKey: :TELEFOON
+      csvColumn: TELEFOON
+
+    - sql: select  nid from node_field_data where lower(title)=lower(:TITLE)
+      variableKey: :TITLE
+      excelColumn: BEDRIJFSNAAM
+      reason: BEDRIJFSNAAM matches title
+
+    # kvk
+    - sql: select entity_id as nid from node__field_listing_coc_no where field_listing_coc_no_value=:KVK  and bundle='listing'
+      variableKey: :KVK
+      excelColumn: KVK
+      reason: KVK matches coc_no_value
+
+    # adres
+    - sql: select entity_id as nid from node__field_listing_street where field_listing_street_value=:STREET  and bundle='listing'
+      variableKey: :STREET
+      excelColumn: ADRES
+      reason: ADRES matches street_value
+
+    - sql: select entity_id as nid from node__field_listing_address where field_listing_address_value=:ADDRESS  and bundle='listing'
+      variableKey: :ADDRESS
+      excelColumn: ADRES
+      reason: ADRES matches address_value
+    #
+    # try a match on the last 9 digits of the phone number
+    - sql: |
+        SELECT p1.entity_id AS nid
+        FROM node__field_listing_phone p1
+        left join node__field_listing_phone2 p2 on p2.entity_id = p1.entity_id
+        left join node__field_listing_phone3 p3 on p3.entity_id = p1.entity_id
+        left join node__field_listing_phone4 p4 on p4.entity_id = p1.entity_id
+
+        WHERE SUBSTRING(p1.field_listing_phone_value, -9) = concat("987654321",SUBSTRING(:TELEFOON, -9))
+        OR SUBSTRING(p2.field_listing_phone2_value, -9) =  concat("987654321",SUBSTRING(:TELEFOON, -9))
+        OR SUBSTRING(p3.field_listing_phone3_value, -9) =  concat("987654321",SUBSTRING(:TELEFOON, -9))
+        OR SUBSTRING(p4.field_listing_phone4_value, -9) =  concat("987654321",SUBSTRING(:TELEFOON, -9))
+          AND p1.bundle = 'listing'
+      variableKey: :TELEFOON
+      excelColumn: TELEFOON
+      reason: last 9 digits of TELEFOON matches field_listing_phone, 1, 2 or 3
+
+    # try a match on the last 9 digits of the TELEFOON2 nr
+    - sql: |
+        SELECT p1.entity_id AS nid
+        FROM node__field_listing_phone p1
+        left join node__field_listing_phone2 p2 on p2.entity_id = p1.entity_id
+        left join node__field_listing_phone3 p3 on p3.entity_id = p1.entity_id
+        left join node__field_listing_phone4 p4 on p4.entity_id = p1.entity_id
+
+        WHERE SUBSTRING(p1.field_listing_phone_value, -9) =  concat("987654321",SUBSTRING(:TELEFOON, -9))
+        OR SUBSTRING(p2.field_listing_phone2_value, -9) =  concat("987654321",SUBSTRING(:TELEFOON, -9))
+        OR SUBSTRING(p3.field_listing_phone3_value, -9) =  concat("987654321",SUBSTRING(:TELEFOON, -9))
+        OR SUBSTRING(p4.field_listing_phone4_value, -9) =  concat("987654321",SUBSTRING(:TELEFOON, -9))
+          AND p1.bundle = 'listing'
+      variableKey: :TELEFOON
+      excelColumn: TELEFOON2
+      reason: last 9 digits of TELEFOON2 matches field_listing_phone, 1, 2 or 3
+
+
+
+
+todo_with_columns:
+  # MAIN KEYS
+  # node_create:
+  # node_fields:
+  # node_paragraph_fields:
+  # node_paragraph_paragraph_fields:// to do
+  # node_paragraph_taxonomy_fields:// to do
+  # node_taxonomy_fields:
+  # node_taxonomy_paragraph_fields:// to do
+  # node_taxonomy_taxonomy_fields:// to do
+
+  # NODE_CREATE
+  # example minimum configuration
+  # executed for each imported row (handles reusing when found automatically)
+  # node_create:
+  #  type: listing
+  #  column_name: NAAM
+  #  field: title
+
+  # NODE_FIELDS
+  # adding node field values to the node
+  # - column_name: COLUMN LABEL
+  #   field: field machine name
+  #   value: When present a 'static value' which overrides the xlsx, or when missing in the xlsx
+  #   format: full_html  setting for a rich text field
+  #   action: add term                      // optional signal adding a term to field, but as well in taxonomy
+  #   taxonomy: financial_advisor_products  // the taxonomy
+  #   term: Dienst verlenings document      // the term name
+  #   termLanguageId: nl                    // the term language id
+
+
+
+  # SPECIALS
+  # the import adds fields to the csv
+  # like CANVASS, ETL, LOCATION, CATEGORY
+  #
+  # action: append id
+  # appends the id of cell CANVASS to the field
+  # the csv contains a target_id which is added without duplicating it.
+
+  # prepare_action: add term hierarchy
+  #
+  # example
+  #- column_name: LOCATION_HIERARCHY
+  # # is processed as special case uses land, provincie en stad
+  # field: field_listing_location
+  # # value is a hierarchy of terms, separated by comma
+  # prepare_action: add term hierarchy
+  # # requires taxonomy
+  # taxonomy: listing_locations
+  # # replace existing tid
+  # # when accompanied by prepare_action add term hierarchy
+  # # it should have 'grandparent,parent,term' as text
+  # action: set id
+
+  # - column_name: CANVASS
+  #  field: field_listing_canvas_tags
+  #  action: append id
+
+  # action: add term
+  #, add existing terms to a term reference field
+  #   column_name: COLUMN LABEL
+  #   field: machine name of field
+  #   action: add term
+  #   taxonomy: vid
+  #   term: Term name
+  #   termLanguageId: nl
+
+  # _auto_chain means: set a field with a value
+  #   somewhere else ... due to a given field value
+  #   Example when column header is BEZOEK ADRES
+  #   we must set adres AND type of address to 'visiting address'
+  #   -auto_chain says continue with next line for this cell
+
+  # content of cell ADRES is placed in street, address and postcode
+  #- column_name: ADRES
+  #  field: field_listing_street
+  #- name: _auto_chain
+  #  field: field_listing_address
+  #- name: _auto_chain
+  #  field: field_listing_postcode
+
+  # action: await
+  #   This awaits creation of the node 'contact'
+  #  (identified by id: __contact in contact
+  #   Action await tells: wait for node create with
+  #   this id and when it is there,
+  #   set it to field_test_contact
+
+  # CREATING OTHER NODE TYPES
+  # in create node contact
+  # - node_create
+  #   id: __contact
+  #   ...
+  # - name: __contact
+  #   action: await
+  #   field: field_test_contact
+
+  # $fieldTypes
+  # 'string' i.e. plain text 255
+  # 'text', i.e. html
+  # 'text_long',
+  # 'integer',
+  # 'decimal',
+  # 'float',
+  # 'boolean',
+  # 'date',
+  # 'entity_reference',
+  # 'taxonomy_term_reference',
+  # 'file',
+  # 'image',
+  # 'email',
+  # 'link',
+  # 'list_string',
+  # 'list_integer',
+  # 'list_float',
+  # 'list_boolean',
+  # 'list_text',
+  # 'datetime',
+  # 'geofield',
+
+  # it starts with a node create
+  # with a type and the mandatory title csv reference
+  # use id: __ when you need this node later in a referenced field value
+
+  # used by listing to signal it reference this
+  # notice the __ there need to be 2 _ for this to be correct
+  # id: __.....
+  - node_create:
+      # id so bm_id can be set with the nid after creation
+      id: __listing
+      type: listing
+      name: BEDRIJFSNAAM
+      field: title
+
+    # there are three types fields to define
+    # 1 node_fields
+    # 2 node_paragraph_fields
+    # 3 paragraph_paragraph_fields
+
+    # - name: CSV Name
+    #   field: field name
+    #   multiple: true false
+    #   description:
+
+    ## hard coding a content value or using the CSV
+    #   value: absent or value
+
+    #PREPARE_ACTION: add term hierarchy
+    # do an action before processing the field.node_create:
+
+    # example
+    # LOCATION_HIERARCHY="Nederland,Groningen,Kropswolde"
+    # definition
+    #- name: LOCATION_HIERARCHY
+    # // is processed as special case uses land, provincie en stad
+    # field: field_listing_location
+    # // value is a hierarchy of terms, separated by comma
+    # prepare_action: add term hierarchy
+    # // requires taxonomy
+    # taxonomy: listing_locations
+    # // replace existing tid
+    # // when accompanied by prepare_action add term hierarchy
+    # // it should have 'grandparent,parent,term' as text
+    # action: set id
+
+    #ACTION:
+    # add value to the next available delta
+    #   action: append
+
+    # remove all values from the delta's
+    #   action: clear_first
+
+    # concat this Excel value with what's already in the field using the separator
+    #   action: concat "|"
+
+    # type: taxonomy_term_reference
+    #   action: add term, (csv has term name)
+    #           append id (csv has tid)
+    #           or absent
+    #
+    # taxonomy: a taxonomy which is required to be present
+
+    #   empty means expected from row
+    #   a value means set this term (label)
+    # term:
+
+    # termlanguageId: nl or en or fr
+
+    # replace existing tid
+    #  action: set id
+
+    # interpret the csv as a hierarchy of terms, separated by comma
+    #   prepare_action: add term hierarchy
+
+    # action: currentDateTime
+    #
+    #TYPE:
+    # define the field type of field to be created
+    #   type: string_long
+    #   format: full_html
+    #   type: string(255) (plain text)
+    #   type: text (html text)
+    # paragraph
+    #   type: entity_reference_revisions,
+
+    # references: another - name
+    #ACTION:
+    # this field awaits the creation of something else to be ready
+    #   action: await
+
+    #ACTION:
+    # get image_id to put into value
+    #   action: upload_image
+
+    #ACTION:
+    # get image into image callery and set uri, width, height
+    #  action: image gallery in u_w_h format
+
+    # unclear?
+    #   action: set select
+
+    # - autochain
+    # _auto_chain means, set a field with a value
+    # somewhere else due a given field value
+    # when column header is BEZOEK ADRES
+    # we must set adres and type of address to 'visiting address'
+    # -auto_chain does that
+
+    # SYSTEM FIELDS when not provided in csv,
+    # but they are required
+    # when not, import wil ask for it
+
+    # FIELDS IN THE NODE
+    # there are three types fields to define
+    # 1 node_fields
+    # 2 node_paragraph_fields
+    # 3 paragraph_paragraph_fields
+    #   paragraph_paragraph?
+    #   taxonomy fields todo
+
+    # currentDateTime sets field to ..
+
+  - node_fields:
+    - column_name: CANVASS
+      field: field_listing_canvas_tags
+      action: append id
+
+    # todo
+    #      - name: listing_hubspot_updated
+    #        field: listing_hubspot_updated
+    #        value: '31-12-2030'
+
+    # special this awaits creation of
+    # node contact (identified by id in contact
+    # action await tells, wait for node create with
+    # this id and fill it when available into this node.
+    - name: __contact
+      action: await
+      field: field_listing_contacts
+
+    - column_name: CANVASS
+      field: field_listing_canvas_tags
+      action: append id
+      prepare_action: add term hierarchy
+      taxonomy: company_campaign_canvas_tags
+
+    # build in handler
+    # using upload file name
+    - column_name: ETL
+      action: set id
+      prepare_action: add term
+      taxonomy: listing_etl_sources
+      field: field_listing_etl_sheetname
+
+    # a location tid, is not provided
+    #- column_name: LOCATION
+    #  field: field_listing_location
+    #  value: 5182
+
+    # LOCATION_HIERARCH="Nederland, Groningen, Kropswolde"
+    - column_name: LOCATION_HIERARCHY
+      # is processed as special case uses land, provincie en stad
+      # when stad is aanwezig.
+      field: field_listing_location
+      # interpret the LOCATION
+      # as a hierarchy of terms, separated by comma
+      prepare_action: add term hierarchy
+      # requires taxonomy
+      taxonomy: listing_locations
+      # when accompanied by prepare_action add term hierarchy
+      # it should have 'grandparent,parent,term' as text
+      action: set id
+
+
+    # create a taxonomy location entry from defined TID
+    # LOCATION=1281
+    - column_name: LOCATION
+      # is processed as special case uses land, provincie en stad
+      # when stad is aanwezig.
+      # replace existing tid
+      # when it does not have prepare_action add term hierarchy
+      # the value must be a TID
+      # when accompanied by prepare_action add term hierarchy
+      # it should have 'grandparent,parent,term' as text
+      action: set id
+
+    # comma list of category labels
+    #- column_name: CATEGORY
+    #  field: field_listing_category
+    #  # replace existing tids
+    #  action: set ids
+    #  # create the terms if not exist
+    #  prepare_action: add term
+    #  taxonomy: category
+    #  # term: CATEGORY unclear wat dit is
+    #  termLanguageId: TITLE_LANGUAGECODE
+
+
+    - column_name: CATEGORY
+      field: field_listing_category
+      # create the terms if not exist
+      prepare_action: add term hierarchy
+      taxonomy: listing_category
+      # add these terms tids
+      action: set ids
+      #  termLanguageId: TITLE_LANGUAGECODE
+
+    - column_name: TAGS
+      field: field_listing_tags
+      prepare_action: add term
+      taxonomy: listing_tags
+      termLanguageId: TITLE_LANGUAGECODE
+      action: set ids
+
+    - column_name: STATUS
+      field: field_listing_status
+      prepare_action: add term
+      taxonomy: listing_status
+      termLanguageId: TITLE_LANGUAGECODE
+      action: set ids
+
+    - column_name: AMENITIES
+      field: field_listing_amenities
+      prepare_action: add term
+      taxonomy: amenities
+      termLanguageId: TITLE_LANGUAGECODE
+      action: set ids
+
+    # Body
+    - column_name: HANDELSNAMEN
+      field: body
+      format: full_html
+      # use what field_listing_tagline is using
+    - name: _auto_chain
+      field: field_listing_tagline
+
+    - column_name: ADRES
+      field: field_listing_address
+
+    - column_name: STAD
+      field: field_listing_city
+
+    - column_name: STRAAT
+      field: field_listing_street
+
+    - column_name: HUISNUMMER
+      field: field_listing_housenumber
+
+    - column_name: POSTCODE
+      field: field_listing_postcode
+
+      #- column_name: AREA
+      #  action: ignore
+
+    - column_name: PROVINCIE
+      field: field_listing_province
+
+    - column_name: LAND
+      field: field_listing_country
+
+    # this is the canvass of the source of this listing
+    # not the canvass in this instance.
+    - column_name: CANVASS
+      action: ignore
+
+    #     - column_name: PLACEID
+    #       action: ignore
+    #       field: field_listing_place_id
+
+    # uitzoeken see google places import code
+    # array[0=>
+    # [
+    #   name,
+    #   lat,
+    #   lon,
+    #   zoom:9,
+    #   type:roadmap,
+    #   width: 100%,
+    #   height:450px,
+    #   marker:1,
+    #   traffic:0,
+    #   marker_icon:1,
+    #   controls:"1"
+    # ]
+
+    # place city in google map control name as well
+    - column_name: STAD
+      field: field_listing_map
+      action: modify
+      operator: google_map_control name
+    #
+    # other available keys
+    # 'zoom' => '9',
+    # 'type' => 'roadmap',
+    # 'width' => '100%',
+    # 'height' => '450px',
+    # 'marker' => '1',
+    # 'traffic' => '0',
+    # 'marker_icon' => '',
+    # 'controls' => '1',
+    # 'infowindow' => '',
+    #
+    - column_name: LAT
+      field: field_listing_map
+      action: modify
+      operator: google_map_control lat
+
+    - column_name: LON
+      field: field_listing_map
+      action: modify
+      operator: google_map_control lon
+
+    - column_name: TELEFOON
+      field: field_listing_phone
+
+    - column_name: TELEFOON2
+      field: field_listing_phone2
+
+    - column_name: TELEFOON3
+      field: field_listing_phone3
+
+    - column_name: TELEFOON4
+      field: field_listing_phone4
+
+    - column_name: WEBSITE
+      field: field_listing_website
+
+    - column_name: EMAIL
+      field: field_listing_email
+
+    - column_name: KVK
+      field: field_listing_coc_no
+
+    - column_name: AANTAL_VESTIGINGEN
+      field: field_listing_no_of_offices
+
+    - column_name: BEDRIJFSVORM
+      field: field_listing_business_type
+
+    - column_name: HAS SOLAR
+      field: field_listing_has_solar
+
+    - column_name: BTW
+      field: field_listing_vat_no
+
+    - column_name: KVK MEDEWERKERS
+      field: field_listing_employees
+
+    # flat text field
+    # in code also field_listing_sbi_hierarchy is set
+    # and the sbi code is stored to taxonomy listing_sbi_code
+    - column_name: SBI
+      field: field_listing_sbi_code
+
+    - column_name: LINKEDIN
+      field: field_listing_linkedin
+
+    - column_name: FACEBOOK
+      field: field_listing_facebook
+
+    - column_name: TWITTER
+      field: field_listing_twitter
+
+      #- column_name: PHOTOS
+      # 'field' is not used in this case,
+      # the action uses hard coded fields
+      #  field: field_listing_image
+      # field_listing_gallery
+      # load and transform u={path},w={width},h={height) to fid
+    #  action: image gallery in u_w_h format
+
+    - name: __place_paragraph_id
+      action: await
+      field: field_listing_place_paragraph
+
+  - node_paragraph_fields:
+    # set up an address paragraph
+    - field: field_listing_address_paragraph
+      paragraph:
+        name: paragraph_address
+        fields:
+          - column_name: STAD
+            field: field_para_address_city
+
+          - column_name: LAND
+            field: field_para_address_country
+
+          # field_para_address_epsg_x
+          # field_para_address_epsg_y
+          - column_name: HUISNUMMER
+            field: field_para_address_housenr
+
+          - column_name: LAT
+            field: field_para_address_latitude
+          - column_name: LON
+            field: field_para_address_longitude
+
+          # field_para_address_type
+          - column_name: ADRES
+            field: field_para_address_unstructured
+          - column_name: POSTCODE
+            field: field_para_address_postalcode
+          - column_name: PROVINCIE
+            field: field_para_address_province
+          - column_name: STRAAT
+            field: field_para_address_street
+
+          # setup listing google places paragraph
+          - field: field_listing_place_paragraph
+            paragraph:
+              name: place_listing_paragraph
+              fields:
+                - column_name: TELEFOON
+                  field: field_para_place_nationalphonenr
+
+
+    # setup business paragraph
+    - field: field_listing_business_paragraph
+      paragraph:
+        name: business_paragraph
+        fields:
+          - column_name: KVK
+            field: field_para_business_registration
+          - column_name: HANDELSNAMEN
+            field: field_para_business_brandname
+          - column_name: BEDRIJFSNAAM
+            field: field_para_business_companyname
+
+          # flat text field
+          # in code also field_listing_sbi_hierarchy is set
+          # and the sbi code is stored to taxonomy listing_sbi_code
+          - column_name: SBI
+            field: field_para_business_sbi_code
+
+          - column_name: SBI
+            field: field_para_business_sbihierarchy
+            value: 0
+            action: set id
+
+          - column_name: BTW
+            field: field_para_business_vat_number
+
+          - column_name: BEDRIJFSVORM
+            field: field_para_business_type
+
+          - column_name: WEBSITE
+            field: field_para_business_website
+
+          - column_name: KVK MEDEWERKERS
+            field: field_para_business_no_employees
+
+          - column_name: OPGERICHT
+            field: field_para_business_establish_yr
+
+    - field: field_listing_specifics_para
+      paragraph:
+        name: infrastructure_paragraph
+        fields:
+          - column_name: HAS SOLAR
+            field: field_para_listing_has_solar
+
+        ## setup financial advisors paragraph
+    - field: field_listing_specifics_para
+      paragraph:
+        name: finadvisors_listing_paragraph
+        fields:
+          - column_name: PRODUCTEN
+            field: field_para_fa_products
+            prepare_action: add term
+            taxonomy: financial_advisor_products
+            action: set ids
+            termLanguageId: nl
+
+          - column_name: BEDRIJFSVORM
+            field: field_para_fa_rechtsvorm
+
+          - column_name: KVK
+            field: field_para_fa_kvk_registration
+
+
+    #  - node_create:
+
+    # create and remember the NID to use elsewhere
+    # where you want to use this id do:
+    # - name: __contact
+    #        action: await
+    #   field: field_listing_contacts
+    #
+    # the NID is used in listing to signal it reference this
+    # notice the __ there need to be 2 _ for this to be correct
+    #      id: __contact
+    #      type: contact
+    #      column_name: BEDRIJFSNAAM
+    #      field: title
+
+    # - column_name: TITEL
+    #   node_fields:
+    #   - column_name: OMSCHRIJVING
+    #     field: body
+    #     format: full_html
+
+    # _auto_chain means, set a field with a value
+    # somewhere else due a given field value
+    # when column header is BEZOEK ADRES
+    # we must set adres and type of address to 'visiting address'
+    # -auto_chain does that
+
+#  - node_paragraph_fields:
+#      - field: field_p_contact_address
+#        paragraph:
+#          name: paragraph_address
+#          fields:
+#            - column_name: ADRES
+#              field: field_para_address_unstructured
+#            - name: _auto_chain
+#              field: field_para_address_type
+#              value: visiting address
+#
+#    # add #n for next
+#  - node_paragraph_fields#2:
+#      - field: field_p_contact_address
+#        paragraph:
+#          name: paragraph_address
+#          fields:
+#            - column_name: ADRES
+#              field: field_para_address_unstructured
+#            - name: _auto_chain
+#              field: field_para_address_type
+#              value: postal address
+
+todo_after_import:
+
+
+
+# todo to make it more complete
+# field_listing_tags init met leeg (toont als Labels op workbench)
+# field_listing_amenities
+# field_listing_status
+# field_listing_category agrarische bedrijven, pluimveehouders
+# para_address_type
+# field_listing_sbi_code replace with taxonomy, and multiple
+# field_bm_id fill with node id

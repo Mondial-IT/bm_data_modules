@@ -1,0 +1,62 @@
+bm_config_sync.bluemarloc:
+  title: 'bm_config_sync'
+  description: 'config bm_config_sync'
+  parent: bm_main.bluemarloc_developer
+  route_name: bm_config_sync.settings_form
+  weight: 1
+#
+bm_config_sync.bm_config_sync_settings_form:
+  title: 'Settings'
+  description: 'Settings for module bm_config_sync'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.settings_form
+  weight: 10
+#
+bm_config_sync.bm_config_sync_combined_erd_form:
+  title: 'Combined ERDs'
+  description: 'Create entity relations table of an entity and its dependents'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.bm_config_sync_combined_erd_form
+  weight: 20
+#
+bm_config_sync.bm_config_sync_individual_erd_form:
+  title: 'Individual ERDs'
+  description: 'Create entity relations table per entity'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.bm_config_sync_individual_erd_form
+  weight: 21
+#
+
+bm_config_sync.bm_config_sync_uuid_form:
+  title: 'Sync config UUIDs with a target'
+  description: 'Adopt UUIDs from a target instance'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.bm_config_sync_uuid_form
+  weight: 23
+#
+bm_config_sync.bm_config_sync_importexport_form:
+  title: 'import export'
+  description: 'import export'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.bm_config_sync_import_export_form
+  weight: 30
+bm_config_sync.bm_config_sync_export_form:
+  title: 'export'
+  description: 'export'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.bm_config_sync_export_form
+  weight: 32
+#
+bm_config_sync.bm_config_sync_import_form:
+  title: 'import'
+  description: 'import'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.bm_config_sync_import_form
+  weight: 33
+#
+bm_config_sync.bm_config_sync_json_api:
+  title: 'JSON API'
+  description: 'available endpoints'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.bm_config_sync_jsonapi_endpoints
+  weight: 34

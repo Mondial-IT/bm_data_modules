@@ -1,0 +1,502 @@
+#file: noinspection spellcheckinginspection
+importdefinition: cdr
+csvseparator: ";"
+#
+#id: "66d87450e90cc756e5de1358"
+#date: "2024-09-04t14:53:04.197z"
+#direction: "outbound"
+#
+#externalnumber:
+#  anonymous: false
+#  localized: "076 503 8474"
+#  e164: "+31765038474"
+#  isonclientblacklist: false
+#  isonglobalblacklist: false
+#
+#internalnumber:
+#  id: null
+#  label: null
+#  localizednumber: "+31 74 234 0888"
+#  number: "+31742340888"
+#
+#duration: 71
+#status: "answered"
+#missedreason: null
+#menuoption: null
+#
+#user:
+#  id: "6658359f1ca449b2112bc9a2"
+#  initials: "av"
+#  firstname: "arthur"
+#  lastname: "van der leer"
+#  fullname: "arthur van der leer"
+#
+#phonenumber:
+#  availability: "available"
+#
+#avatarurls:
+#  contact: null
+#  voicemail: null
+#
+#callrecording:
+#  id: "66d87450e90cc756e5de1359"
+#  availableuntil: "2024-12-03t15:54:15.461z"
+#  playurl: "https://api.rinkel.com/v1/call-recordings/66d87450e90cc756e5de1359/stream"
+#
+#notes: []
+#
+#insights:
+#  status: "available"
+#  summary: "in dit telefoongesprek tussen arthur van der leer en een klant, probeert arthur informatie te geven over energieoplossingen voor zonnepanelen. de klant, die de telefoon aan haar moeder geeft, toont echter geen interesse in de aangeboden diensten en geeft aan dat ze al geregeld zijn."
+#  customsummary: null
+#  sentiment: "negative"
+#
+#topics:
+#  - "problemen"
+#  - "interesse"
+#  - "energie"
+#  - "zonnepanelen"
+
+groups:
+  - todo_before_import
+  - todo_with_headers
+  - todo_with_columns
+  - todo_after_import
+
+# this creates fields on entities
+# this creates paragraph types
+
+todo_before_import:
+
+# fieldtypes
+# 'string' or 'string(200)' plain text field
+# 'text',       html field
+# 'text_long',  html field
+# 'string_long'
+
+# 'integer',
+# 'decimal',
+# 'float',
+# 'boolean',
+# 'date',
+# 'entity_reference',         -name, type, references, description
+# 'taxonomy_term_reference',
+# 'file',
+# 'image',
+# 'email',
+# 'link',
+# 'list_string',
+# 'list_integer',
+# 'list_float',
+# 'list_boolean',
+# 'list_text',
+# 'datetime',
+# 'geofield',
+
+  # listing references the CDR
+  - name: create_node_fields
+    content_type: listing
+    fields:
+      - name: field_listing_cdr_reference
+        type: entity_reference
+        references: call_detail_record
+
+  # interaction references the cdr
+  - name: create_node_fields
+    content_type: interaction
+    fields:
+      - name: field_interaction_cdr_reference
+        type: entity_reference
+        references: call_detail_record
+
+  # create node_type
+  - name: create_node_type
+    label: call detail record
+    content_type: call_detail_record
+    description: 'call detail record information'
+
+#
+# @see bmimport_todo_before_import.php
+
+  # the CDR references listing
+  # the CDR references interaction
+  - name: create_node_fields
+    content_type: call_detail_record
+    fields:
+      - name: field_cdr_listing_reference
+        type: entity_reference
+        references: listing
+
+      - name: field_cdr_interaction_reference
+        type: entity_reference
+        references: interaction
+
+
+      - name: field_cdr_id
+        type: string
+
+      - name: field_cdr_date # "2024-09-04t14:53:04.197z"
+        type: datetime
+
+      - name: field_cdr_date_timestamp
+        type: integer
+
+      - name: field_cdr_date_as_date # :
+        type: date
+
+      - name: field_cdr_direction # : "outbound"
+        type: string
+
+      - name: field_cdr_extnumber_anonymous # : false
+        type: string
+
+      - name: field_cdr_extnumber_localized # : "076 503 8474"
+        type: string
+
+      - name: field_cdr_extnumber_e164 # : "+31765038474"
+        type: string
+
+      - name: field_cdr_extnr_clientblacklist # : false
+        type: string
+
+      - name: field_cdr_extnr_globlblacklist # : #  false
+        type: string
+
+      - name: field_cdr_intnumber_id # : null
+        type: string
+
+      - name: field_cdr_intnumber_label # : null
+        type: string
+
+      - name: field_cdr_intnumber_localnumber # : "+31 74 234 0888"
+        type: string
+
+      - name: field_cdr_intnumber_number # : "+31742340888"
+        type: string
+
+      - name: field_cdr_duration # : 71
+        type: string
+
+      - name: field_cdr_status # : "answered"
+        type: string
+
+      - name: field_cdr_missed_reason # : null
+        type: string
+
+      - name: field_cdr_menuoption # : null
+        type: string
+
+      - name: field_cdr_user_id # : "6658359f1ca449b2112bc9a2"
+        type: string
+
+      - name: field_cdr_user_initials # : "av"
+        type: string
+
+      - name: field_cdr_user_firstname # : "arthur"
+        type: string
+
+      - name: field_cdr_user_lastname # : "van der leer"
+        type: string
+
+      - name: field_cdr_user_fullname # : "arthur van der leer"
+        type: string
+
+      - name: field_cdr_fullname # : "arthur van der leer"
+        type: string
+
+      - name: field_cdr_phonenumber # :
+        type: string
+
+      - name: field_cdr_availability # : "available"
+        type: string
+
+      - name: field_cdr_avatarurls # :
+        type: string
+
+      - name: field_cdr_contact # : null
+        type: string
+
+      - name: field_cdr_voicemail # : #  null
+        type: string
+
+      - name: field_cdr_callrecording_audio_url # :
+        type: string_long
+# ?
+      - name: field_cdr_audio_url # :
+        type: string_long
+
+
+      - name:  field_cdr_audio_url_created
+        type:  timestamp
+
+      - name: field_cdr_callrecord_id # : "66d87450e90cc756e5de1359"
+        type: string
+
+      - name: field_cdr_callrecord_availuntil # : "2024-12-03t15:54:15.461z"
+        type: string
+
+      - name: field_cdr_callrecord_play_url # : "https://api.rinkel.com/v1/call-recordings/66d87450e90cc756e5de1359/stream"
+        type: string_long
+# ?
+      - name: field_cdr_play_url # : "https://api.rinkel.com/v1/call-recordings/66d87450e90cc756e5de1359/stream"
+        type: string_long
+
+
+      - name: field_cdr_has_notes # : []
+        type: boolean
+
+      - name: field_cdr_insight_status # : "available"
+        type: string
+
+      - name: field_cdr_summary # : "in dit telefoongesprek tussen arthur van der leer en een klant, probeert arthur informatie te geven over energieoplossingen voor zonnepanelen. de klant, die de telefoon aan haar moeder geeft, toont echter geen interesse in de aangeboden diensten en geeft aan dat ze al geregeld zijn."
+        type: string_long
+
+      - name: field_cdr_custom_summary # : null
+        type: text_long
+
+      - name: field_cdr_sentiment # : "negative"
+        type: string
+
+      - name: field_cdr_topics # :
+        type: taxonomy_term_reference
+        multiple: true
+
+  # CREATE PARAGRAPH FIELDS
+  # interaction log field referencing
+  - name: create_paragraph_fields
+    paragraph: listing_interaction_paragraph
+    fields:
+      - name: 'field_para_interaction_cdr'
+        type: entity_reference
+        references: call_detail_record
+
+
+todo_with_headers:
+  - name: clean
+    replace:
+      - ':'
+      - ' '
+    uppercase: all
+
+todo_with_rows:
+
+#--------------------------------------------------
+# todo_with_columns
+#
+# create a listing based on the title column, fills field title
+# - node_create:
+#    type: listing
+#    name: titel
+#    field: title
+
+# node_fields:
+# node_paragraph_fields:
+
+# create a contact entity
+
+# - node_create
+#  id: __contact   the id __contact is referenced in the columns to link listing and contact
+#                 note the __ which is mandatory for id's.
+#  type: contact
+#  name: naam
+#  field: title
+
+# field definitions
+# - name: column label
+#   field: field machine name
+#   value: when present a 'static value' which overrides the csv, or when missing in the csv
+#   format: full_html  setting for a rich text field
+#   action: add term                      // optional signal adding a term to field, but as well in taxonomy
+#   taxonomy: financial_advisor_products  // the taxonomy
+#   term: dienst verlenings document      // the term name
+#   termlanguageid: nl                    // the term language id
+#                                         // note we do not support the other taxo fields a.t.m.
+
+# specials
+# the import adds fields to the csv
+# like _canvass, _etl, _location, _category
+#
+# action: append id
+# appends the id of cell _canvass to the field
+# the csv contains a target_id which is added without duplicating it.
+
+# - name: _canvass
+#  field: field_listing_canvas_tags
+#  action: append id
+
+# action: add term
+#, add existing terms to a term reference field
+#   name: column label
+#   field: machine name of field
+#   action: add term
+#   taxonomy: vid
+#   term: term name
+#   termlanguageid: nl
+
+# action: await
+#   this awaits creation of the node 'contact'
+#  (identified by id: __contact in contact
+#   action await tells: wait for node create with
+#   this id and when it is there,
+#   set it to field_test_contact
+
+# node listing:
+# - name: __contact
+#   action: await
+#   field: field_test_contact
+
+# in create node contact
+# - node_create
+#   id: __contact
+#   ...
+
+
+# _auto_chain means: set a field with a value
+#   somewhere else ... due to a given field value
+#   example when column header is bezoek adres
+#   we must set adres and type of address to 'visiting address'
+#   -auto_chain says continue with next line for this cell
+
+# content of cell adres is placed in street, address and postcode
+#- name: adres
+#  field: field_listing_street
+#- name: _auto_chain
+#  field: field_listing_address
+#- name: _auto_chain
+#  field: field_listing_postcode
+
+
+
+
+
+todo_with_columns:
+  - node_create:
+      id: __cdr
+      type: call_detail_record
+      name: field_cdr_id
+      field: field_cdr_id
+
+  - node_fields:
+
+      - name: field_cdr_id
+      - field: field_cdr_id
+
+      - name: field_cdr_date # "2024-09-04t14:53:04.197z"
+      - field: field_cdr_date # "2024-09-04t14:53:04.197z"
+
+      - name: field_cdr_date_as_date # "2024-09-04t14:53:04.197z"
+      - field: field_cdr_date_as_date # "2024-09-04t14:53:04.197z"
+
+      - name: field_cdr_date_timestamp
+      - field: field_cdr_date_timestamp
+
+      - name: field_cdr_direction # : "outbound"
+      - field: field_cdr_direction # : "outbound"
+
+      - name: field_cdr_extnumber_anonymous # : false
+      - field: field_cdr_extnumber_anonymous # : false
+
+      - name: field_cdr_extnumber_localized # : "076 503 8474"
+      - field: field_cdr_extnumber_localized # : "076 503 8474"
+
+      - name: field_cdr_extnumber_e164 # : "+31765038474"
+      - field: field_cdr_extnumber_e164 # : "+31765038474"
+
+      - name: field_cdr_extnr_clientblacklist # : false
+      - field: field_cdr_extnr_clientblacklist # : false
+
+      - name:  field_cdr_extnr_globlblacklist # : #  false
+      - field: field_cdr_extnr_globlblacklist # : #  false
+
+      - name: field_cdr_intnumber_id # : null
+      - field: field_cdr_intnumber_id # : null
+
+      - name: field_cdr_intnumber_label # : null
+      - field: field_cdr_intnumber_label # : null
+
+      - name: field_cdr_intnumber_localnumber # : "+31 74 234 0888"
+      - field: field_cdr_intnumber_localnumber # : "+31 74 234 0888"
+
+      - name: field_cdr_intnumber_number # : "+31742340888"
+      - field: field_cdr_intnumber_number # : "+31742340888"
+
+      - name: field_cdr_duration # : 71
+      - field: field_cdr_duration # : 71
+
+      - name: field_cdr_status # : "answered"
+      - field: field_cdr_status # : "answered"
+
+      - name: field_cdr_missed_reason # : null
+      - field: field_cdr_missed_reason # : null
+
+      - name: field_cdr_menuoption # : null
+      - field: field_cdr_menuoption # : null
+
+      - name: field_cdr_user_id # : "6658359f1ca449b2112bc9a2"
+      - field: field_cdr_user_id # : "6658359f1ca449b2112bc9a2"
+
+      - name: field_cdr_user_initials # : "av"
+      - field: field_cdr_user_initials # : "av"
+
+      - name: field_cdr_user_firstname # : "arthur"
+      - field: field_cdr_user_firstname # : "arthur"
+
+      - name: field_cdr_user_lastname # : "van der leer"
+      - field: field_cdr_user_lastname # : "van der leer"
+
+      - name: field_cdr_user_fullname # : "arthur van der leer"
+      - field: field_cdr_user_fullname # : "arthur van der leer"
+
+# ?
+      - name: field_cdr_fullname # : "arthur van der leer"
+      - field: field_cdr_fullname # : "arthur van der leer"
+
+
+
+      - name: field_cdr_phonenumber # :
+      - field: field_cdr_phonenumber # :
+
+      - name: field_cdr_availability # : "available"
+      - field: field_cdr_availability # : "available"
+
+      - name: field_cdr_avatarurls # :
+      - field: field_cdr_avatarurls # :
+
+      - name: field_cdr_contact # : null
+      - field: field_cdr_contact # : null
+
+      - name: field_cdr_voicemail # : #  null
+      - field: field_cdr_voicemail # : #  null
+
+      - name: field_cdr_callrecording # :
+      - field: field_cdr_callrecording # :
+
+      - name: field_cdr_callrecord_id # : "66d87450e90cc756e5de1359"
+      - field: field_cdr_callrecord_id # : "66d87450e90cc756e5de1359"
+
+      - name: field_cdr_callrecord_availuntil # : "2024-12-03t15:54:15.461z"
+      - field: field_cdr_callrecord_availuntil # : "2024-12-03t15:54:15.461z"
+
+      - name: field_cdr_callrecord_playurl # : "https://api.rinkel.com/v1/call-recordings/66d87450e90cc756e5de1359/stream"
+      - field: field_cdr_callrecord_playurl # : "https://api.rinkel.com/v1/call-recordings/66d87450e90cc756e5de1359/stream"
+
+      - name: field_cdr_has_notes # : []
+      - field: field_cdr_has_notes # : []
+
+      - name: field_cdr_insight_status # : "available"
+      - field: field_cdr_insight_status # : "available"
+
+      - name: field_cdr_summary # : "in dit telefoongesprek tussen arthur van der leer en een klant, probeert arthur informatie te geven over energieoplossingen voor zonnepanelen. de klant, die de telefoon aan haar moeder geeft, toont echter geen interesse in de aangeboden diensten en geeft aan dat ze al geregeld zijn."
+      - field: field_cdr_summary # : "in dit telefoongesprek tussen arthur van der leer en een klant, probeert arthur informatie te geven over energieoplossingen voor zonnepanelen. de klant, die de telefoon aan haar moeder geeft, toont echter geen interesse in de aangeboden diensten en geeft aan dat ze al geregeld zijn."
+
+      - name: field_cdr_customsummary # : null
+      - field: field_cdr_customsummary # : null
+
+      - name: field_cdr_sentiment # : "negative"
+      - field: field_cdr_sentiment # : "negative"
+
+      - name: field_cdr_topics # :
+      - field: field_cdr_topics # :
+
+
+todo_after_import:

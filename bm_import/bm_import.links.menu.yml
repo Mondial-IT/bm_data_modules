@@ -1,0 +1,40 @@
+bm_import.bluemarloc:
+  title: 'bm_import'
+  description: 'config bm_import'
+  parent: bm_main.bluemarloc_data
+  route_name: bm_import.settings_form
+  weight: 1
+#
+bm_import.settings_form:
+  title: 'Settings'
+  description: 'configure bm_import'
+  parent: bm_import.bluemarloc
+  route_name: bm_import.settings_form
+  weight: 2
+#
+bm_import.bm_importmanagement_form:
+  title: 'Import Management'
+  description: 'manage imports'
+  parent: bm_import.bluemarloc
+  route_name: bm_import.bm_importmanagement_form
+  weight: 1
+#
+#
+
+#
+# TESTING
+#
+bm_import.preflight:
+  title: 'Tests'
+  description: 'tests for bm_import'
+  parent: bm_import.bluemarloc
+  route_name: bm_import.bm_import_panel_preflight_checks_form
+  weight: 3
+#
+#
+bm_import.paragraph_handler_test_form:
+  title: 'Paragraph handler'
+  description: 'verify paragraph manipulation'
+  parent: bm_import.tests
+  route_name: bm_import.paragraph_handler_test_form
+  weight: 1

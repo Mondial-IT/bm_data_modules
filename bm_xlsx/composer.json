@@ -1,0 +1,16 @@
+{
+    "name": "drupal/bm_xlsx",
+    "type": "drupal-module",
+    "description": "excel api",
+    "minimum-stability": "stable",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Blue Marloc",
+            "email": "joel@bluemarloc.com"
+        }
+    ],
+    "require": {
+        "shuchkin/simplexlsx": "^1.0"
+    }
+}

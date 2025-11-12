@@ -1,0 +1,654 @@
+#file: noinspection SpellCheckingInspection
+importDefinition: googlePlaces
+csvSeparator: "|"
+
+groups:
+  - todo_before_import
+  - todo_with_headers
+  - todo_with_columns
+  - todo_after_import
+
+# this creates fields on entities
+# this creates paragraph types
+todo_before_import:
+  # note, first the last, when referencing
+  - name: create_paragraph_type
+    paragraph: place_listing_paragraph
+    description: 'listing paragraph with specific google places information'
+
+  - name: create_paragraph_fields
+    paragraph: place_listing_paragraph
+    fields:
+      - name: 'field_para_place_json'
+        description: 'The place details'
+        # string is single line plain text
+        # text_plain is multi line plain text
+        # string_long is long plain text
+        # text_long is Text (formatted, long)
+        type: string_long
+        multiple: false
+
+      - name: 'field_para_place_review'
+        description: 'Reviews'
+        # Text (formatted, long)
+        type: text_long
+        multiple: true
+
+      - name: 'field_para_place_nationalphonenr'
+        description: 'National phonenumber'
+        type: string
+        multiple: true
+
+      - name: 'field_para_place_viewprt_ne_lat'
+        description: 'Viewport NorthEast Latitude'
+        type: float
+
+      - name: 'field_para_place_viewprt_ne_lng'
+        description: 'Viewport NorthEast Longitude'
+        type: float
+
+      - name: 'field_para_place_viewprt_sw_lat'
+        description: 'Viewport SouthWest Latitude'
+        type: float
+
+      - name: 'field_para_place_viewprt_sw_lng'
+        description: 'Viewport SouthWest Longitude'
+        type: float
+
+      - name: 'field_para_place_google_maps_uri'
+        description: 'Google maps uri'
+        type: string
+
+      - name: 'field_para_place_user_rating'
+        description: 'user rating'
+        type: string
+
+
+
+  - name: create_node_type
+    content_type: listing
+    description: listing
+
+
+  - name: create_node_fields
+    content_type: listing
+    fields:
+      - name: field_listing_place_paragraph
+        # entity_reference for nodes
+        # entity_reference_revisions for paragraphs
+        type: entity_reference_revisions
+        description: 'Listing google place details'
+        # must exist to not throw exception
+        references: place_listing_paragraph
+
+      - name: field_listing_housenumber
+        type: string
+        description: 'House number'
+        label: House number
+
+  #  - name: create_vocabulary
+  #    vocabulary: financial_advisor_products
+  #    description: 'de categorieen van de financial advisors'
+
+
+
+  - name: create_vocabulary_type
+    vocabulary: test_taxonomy
+    description: 'test import created taxonomy'
+
+  - name: create_vocabulary_fields
+    vocabulary: test_taxonomy
+    fields:
+      - name: 'field_term_test'
+        description: 'imported field'
+        type: string
+        multiple: false
+
+
+
+
+
+todo_with_headers:
+  - name: clean
+    replace:
+      - ':'
+      - ' '
+    uppercase: all
+
+todo_with_rows:
+  # this is used to find an existing entity. The more matches the better.
+  locateQueries:
+    # on field_listing_place_id
+    # on field_listing_phone
+    # on title
+    # on field_listing_street
+    # on field_listing_address
+
+    - sql: SELECT entity_id AS nid FROM node__field_listing_phone WHERE REGEXP_REPLACE(field_listing_phone_value, '\\D', '') = REGEXP_REPLACE(:TELEFOON, '\\D', '');
+      variableKey: :TELEFOON
+      csvColumn: INTERNATIONALPHONENUMBER
+    #
+    # SELECT entity_id AS nid FROM node__field_listing_phone WHERE REGEXP_REPLACE(field_listing_phone_value, '[^0-9]', '') = REGEXP_REPLACE(:TELEFOON, '[^0-9]', '');
+    - sql: SELECT entity_id AS nid FROM node__field_listing_phone WHERE REGEXP_REPLACE(field_listing_phone_value, '\\D', '') = REGEXP_REPLACE(:TELEFOON, '\\D', '');
+      variableKey: :TELEFOON
+      csvColumn: NATIONALPHONENUMBER
+    - sql: select  nid from node_field_data where lower(title)=lower(:TITLE)
+      variableKey: :TITLE
+      csvColumn: TITLE
+    - sql: select entity_id as nid from node__field_listing_street where field_listing_street_value=:STREET
+      variableKey: :STREET
+      csvColumn: ADDRESS
+    - sql: select entity_id as nid from node__field_listing_address where field_listing_address_value=:ADDRESS
+      variableKey: :ADDRESS
+      csvColumn: ADDRESS
+    # try a match on the last 9 digits of the phone number
+    - sql: select entity_id as nid from node__field_listing_phone where SUBSTRING(field_listing_phone_value, -9) = SUBSTRING(:TELEFOON, -9)
+      variableKey: :TELEFOON
+      csvColumn: TELEFOON
+
+#--------------------------------------------------
+# todo_with_columns
+#
+# create a listing based on the TITLE column, fills field title
+# - node_create:
+#    type: listing
+#    name: TITEL
+#    field: title
+
+# node_fields:
+# node_paragraph_fields:
+
+# create a Contact entity
+
+# - node_create
+#  id: __contact   the id __contact is referenced in the columns to link listing and contact
+#                 note the __ which is mandatory for id's.
+#  type: contact
+#  name: NAAM
+#  field: title
+
+# field definitions
+# - name: COLUMN LABEL
+#   field: field machine name
+#   value: When present a 'static value' which overrides the csv, or when missing in the csv
+#   format: full_html  setting for a rich text field
+#   action: add term                      // optional signal adding a term to field, but as well in taxonomy
+#   taxonomy: financial_advisor_products  // the taxonomy
+#   term: Dienst verlenings document      // the term name
+#   termLanguageId: nl                    // the term language id
+#                                         // note we do not support the other taxo fields a.t.m.
+
+# SPECIALS
+# the import adds fields to the csv
+# like _CANVASS, _ETL, _LOCATION, _CATEGORY
+#
+# action: append id
+# appends the id of cell _CANVASS to the field
+# the csv contains a target_id which is added without duplicating it.
+
+# - name: _CANVASS
+#  field: field_listing_canvas_tags
+#  action: append id
+
+# action: add term
+#, add existing terms to a term reference field
+#   name: COLUMN LABEL
+#   field: machine name of field
+#   action: add term
+#   taxonomy: vid
+#   term: Term name
+#   termLanguageId: nl
+
+# action: await
+#   This awaits creation of the node 'contact'
+#  (identified by id: __contact in contact
+#   Action await tells: wait for node create with
+#   this id and when it is there,
+#   set it to field_test_contact
+
+# node listing:
+# - name: __contact
+#   action: await
+#   field: field_test_contact
+
+# in create node contact
+# - node_create
+#   id: __contact
+#   ...
+
+
+# _auto_chain means: set a field with a value
+#   somewhere else ... due to a given field value
+#   Example when column header is BEZOEK ADRES
+#   we must set adres AND type of address to 'visiting address'
+#   -auto_chain says continue with next line for this cell
+
+# content of cell ADRES is placed in street, address and postcode
+#- name: ADRES
+#  field: field_listing_street
+#- name: _auto_chain
+#  field: field_listing_address
+#- name: _auto_chain
+#  field: field_listing_postcode
+
+
+
+
+
+todo_with_columns:
+  # it starts with a node create
+  # with a type and the mandatory title csv reference
+  # use id: __ when you need this node later in a referenced field value
+
+  # used by listing to signal it reference this
+  # notice the __ there need to be 2 _ for this to be correct
+  # id: __.....
+  - node_create:
+      type: listing
+      name: TITLE
+      field: title
+
+  # there are three types fields to define
+  # 1 node_fields
+  # 2 node_paragraph_fields
+  # 3 paragraph_paragraph_fields
+  # taxonomy fields are not yet implemented
+  -
+  # - name: CSV Name
+    # field: field name
+    # multiple: true false
+    # description:
+
+    ## hard coding a content value or using the CSV
+    # value: absent or value
+
+    # add value to the next available delta
+    # action: append
+
+    # remove all values from the delta's
+    # action: clear_first
+
+    # concat this csv value with whats already in the field using the separator
+    # action: concat "|"
+
+
+    # type: taxonomy_term_reference
+      # action: add term, (csv has term name)
+      #         append id (csv has tid)
+      #         or absent
+      # taxonomy: a taxonomy
+      #   empty means expected from row
+      #   a value means set this term (label)
+      # term:
+      # termlanguageId: nl
+
+    # type: string_long
+      # format: full_html
+
+    # type: text
+
+    # type: entity_reference_revisions,
+      # references: another name
+
+    # this field awaits the creation of something else to be ready
+    # action: await
+
+    # get image_id to put into value
+    # action: upload_image
+
+    # unclear?
+    # action: set select
+
+    # - autochain
+    # _auto_chain means, set a field with a value
+    # somewhere else due a given field value
+    # when column header is BEZOEK ADRES
+    # we must set adres and type of address to 'visiting address'
+    # -auto_chain does that
+
+
+    # SYSTEM FIELDS when not provided in csv,
+    # but they are required
+    # when not, import wil ask for it
+
+    # FIELDS IN THE NODE
+    # there are three types fields to define
+    # 1 node_fields
+    # 2 node_paragraph_fields
+    # 3 paragraph_paragraph_fields
+    # paragraph_paragraph?
+    # taxonomy fields todo
+
+    node_fields:
+      - name: _CANVASS
+        field: field_listing_canvas_tags
+        action: append id
+
+      # build in handler
+      # using upload file name
+      - name: _ETL
+        field: field_listing_etl_sheetname
+
+      # a location tid, is not provided
+      #- name: _LOCATION
+      #  field: field_listing_location
+      #  value: 5182
+
+      # create a taxonomy location entry country,province,city
+      - name: TAXONOMY_LOCATION
+        field: field_listing_location
+        # replace existing tid
+        action: set id
+        # interpret the TAXONOMY_LOCATION
+        # as a hierarchy of terms, separated by comma
+        prepare_action: add term hierarchy
+        # requires taxonomy
+        taxonomy: listing_location
+
+      # comma list of category labels
+      - name: TAXONOMY_CATEGORY
+        field: field_listing_category
+        # replace existing tids
+        action: set ids
+        # create the terms if not exist
+        prepare_action: add term
+        taxonomy: category
+        # term: CATEGORY unclear wat dit is
+        termLanguageId: TITLE_LANGUAGECODE
+
+      # CATEGORY
+      - name: PRIMARYTYPE
+        field: field_listing_category
+        # add this term
+        action: append id
+        # create the term if not exist
+        prepare_action: add term
+        taxonomy: category
+        # term_label: hard coded term name, not using csv content
+        # term: PRIMARYTYPE not used, unclear
+        # en, nl, fr or a COLUMN_NAME with the language
+        termLanguageId: TITLE_LANGUAGECODE
+
+      - name: SUMMARY
+        field: body
+        format: full_html
+      - name: _auto_chain
+        field: field_listing_tagline
+
+      - name: ADDRESS
+        field: field_listing_street
+      - name: _auto_chain
+        field: field_listing_address
+
+      - name: CITY
+        field: field_listing_city
+      # place city in google map control name as well
+      #- name: _auto_chain
+      #  field: field_listing_map
+      #  action: modify
+      #  operator: google_map_control name
+
+      # todo check do we want it here?
+      - name: STREET
+        field: field_listing_street
+
+      - name: STREETNUMBER
+        field: field_listing_housenumber
+      - name: POSTALCODE
+        field: field_listing_postcode
+
+      - name: AREA
+        action: ignore
+
+        # todo
+      - name: PROVINCE
+        field: field_listing_province
+
+      - name: COUNTRY
+        field: field_listing_country
+
+      # this is the canvass of the source of this listing
+      # not the canvass in this instance.
+      - name: TAXONOMY_CANVASS
+        action: ignore
+
+      - name: PLACEID
+        field: field_listing_place_id
+
+      # uitzoeken see google places import code
+      # array[0=>
+      # [
+      #   name,
+      #   lat,
+      #   lon,
+      #   zoom:9,
+      #   type:roadmap,
+      #   width: 100%,
+      #   height:450px,
+      #   marker:1,
+      #   traffic:0,
+      #   marker_icon:1,
+      #   controls:"1"
+      # ]
+      - name: LAT
+        field: field_listing_map
+        action: modify
+        operator: google_map_control lat
+
+      - name: LNG
+        field: field_listing_map
+        action: modify
+        operator: google_map_control lon
+
+      - name: INTERNATIONALPHONENUMBER
+        field: field_listing_phone
+
+      - name: NATIONALPHONENUMBER
+        action: ignore
+        # todo see paragraph
+
+      - name: WEBSITEURI
+        field: field_listing_website
+
+      - name: PHOTOS
+        # 'field' is not used in this case,
+        # the action uses hard coded fields
+        field: field_listing_image
+        # field_listing_gallery
+        # load and transform u={path},w={width},h={height) to fid
+        action: image gallery in u_w_h format
+
+      - name: __address_paragraph_id
+        action: await
+        field: field_listing_address_paragraph
+
+      - name: __place_paragraph_id
+        action: await
+        field: field_listing_place_paragraph
+
+    node_paragraph_fields:
+      - field: field_listing_address_paragraph
+        paragraph:
+          name: paragraph_address
+          fields:
+            - name: CITY
+              field:  field_para_address_city
+            - name: COUNTRY
+              field: field_para_address_country
+
+            # field_para_address_epsg_x
+            # field_para_address_epsg_y
+            - name: STREETNUMBER
+              field: field_para_address_housenr
+
+            - name: LAT
+              field: field_para_address_latitude
+            - name: LNG
+              field: field_para_address_longitude
+
+            # field_para_address_type
+            - name: ADDRESS
+              field: field_para_address_unstructured
+            - name: POSTALCODE
+              field: field_para_address_postalcode
+            - name: PROVINCE
+              field: field_para_address_province
+            - name: STREET
+              field: field_para_address_street
+
+      - field: field_listing_place_paragraph
+        paragraph:
+          name: place_listing_paragraph
+          fields:
+            - name: NATIONALPHONENUMBER
+              field: field_para_place_nationalphonenr
+              # type: entity_reference_revisions, string_long, text, taxonomy_term_reference
+              # description:
+              # references: another name
+              # multiple: true false
+
+            - name: VIEWPORT_NE_LAT
+              field:  field_para_place_viewprt_ne_lat
+            - name: VIEWPORT_NE_LNG
+              field:  field_para_place_viewprt_ne_lng
+            - name: VIEWPORT_SW_LAT
+              field:  field_para_place_viewprt_sw_lat
+            - name: VIEWPORT_SW_LNG
+              field:  field_para_place_viewprt_sw_lng
+            - name: GOOGLEMAPSURI
+              field: field_para_place_google_maps_uri
+            - name: USERRATING
+              field: field_para_place_user_rating
+
+            # concat text, langcode and publishtime
+            # place into delta of same field
+            - name: REVIEW0_TEXT
+              field: field_para_place_review
+            - name: REVIEW0_LANGUAGECODE
+              field: field_para_place_review
+              action: modify
+              operator: concat ~
+            - name: REVIEW0_PUBLISHTIME
+              field: field_para_place_review
+              action: modify
+              operator: concat ~
+
+            - name: REVIEW1_TEXT
+              field: field_para_place_review
+              action: append
+              prepared_action:
+              - operator: concat ~
+              - name: REVIEW1_LANGUAGECODE
+              - operator: concat ~
+              - name: REVIEW1_PUBLISHTIME
+
+            - name: REVIEW2_TEXT
+              field: field_para_place_review
+              action: append
+
+            - name: REVIEW3_TEXT
+              field: field_para_place_review
+              action: append
+
+            - name: REVIEW4_TEXT
+              field: field_para_place_review
+              action: append
+
+            - name: REVIEW5_TEXT
+              field: field_para_place_review
+              action: append
+
+            - name: REVIEW6_TEXT
+              field: field_para_place_review
+              action: append
+
+            - name: REVIEW7_TEXT
+              field: field_para_place_review
+              action: append
+
+            - name: REVIEW8_TEXT
+              field: field_para_place_review
+              action: append
+
+            - name: REVIEW9_TEXT
+              field: field_para_place_review
+              action: append
+
+
+todo_after_import:
+  - name: niets
+
+
+
+#N
+#LISTING EXISTS
+#?CANVASS
+#?ETL FILE
+#CATEGORY
+# TITLE
+#ADDRESS
+#REFERENCE
+#NID
+# INTERNATIONALPHONENUMBER
+# NATIONALPHONENUMBER
+#TAXONOMY_CATEGORY
+# PRIMARYTYPE
+# CITY
+# SUMMARY
+# STREET
+# STREETNUMBER
+# POSTALCODE
+# AREA
+# PROVINCE
+# COUNTRY
+# TAXONOMY_LOCATION
+# TAXONOMY_CANVASS
+# LAT
+# LNG
+#VIEWPORT_NE_LAT
+#VIEWPORT_NE_LNG
+#VIEWPORT_SW_LAT
+#VIEWPORT_SW_LNG
+# PLACEID
+#GLOBALCODE
+#STATUS
+#PRIMARYTYPEDISPLAYNAME
+# GOOGLEMAPSURI
+# WEBSITEURI
+# USERRATING
+# PRIMARYTYPEDISPLAYNAME_LANGUAGECODE
+#SUMMARY_LANGUAGECODE
+#TITLE_LANGUAGECODE
+# PHOTOS
+#INSTANCE
+# REVIEW0_TEXT
+#REVIEW0_LANGUAGECODE
+#REVIEW0_PUBLISHTIME
+# REVIEW1_TEXT
+#REVIEW1_LANGUAGECODE
+#REVIEW1_PUBLISHTIME
+# REVIEW2_TEXT
+#REVIEW2_LANGUAGECODE
+#REVIEW2_PUBLISHTIME
+# REVIEW3_TEXT
+#REVIEW3_LANGUAGECODE
+#REVIEW3_PUBLISHTIME
+# REVIEW4_TEXT
+#REVIEW4_LANGUAGECODE
+#REVIEW4_PUBLISHTIME
+# REVIEW5_TEXT
+#REVIEW5_LANGUAGECODE
+#REVIEW5_PUBLISHTIME
+# REVIEW6_TEXT
+#REVIEW6_LANGUAGECODE
+#REVIEW6_PUBLISHTIME
+# REVIEW7_TEXT
+#REVIEW7_LANGUAGECODE
+#REVIEW7_PUBLISHTIME
+# REVIEW8_TEXT
+#REVIEW8_LANGUAGECODE
+#REVIEW8_PUBLISHTIME
+# REVIEW9_TEXT
+#REVIEW9_LANGUAGECODE
+#REVIEW9_PUBLISHTIME
+

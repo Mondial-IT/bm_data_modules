@@ -1,0 +1,9 @@
+name: Blue Marloc Import Module
+description: Support for importing content
+package: bluemarloc
+type: module
+version: "1.0"
+#core: 9.x
+core_version_requirement: 11.x
+dependencies:
+  - drupal:field
