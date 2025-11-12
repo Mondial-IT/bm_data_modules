@@ -1,0 +1,5 @@
+bm_import.overview:
+  title: 'BM Import — Import data'
+  description: 'Import content and structured data from external sources (CSV, XLSX). Includes preflight checks, inspector and import execution tools.'
+  route_name: 'help.page'
+  file: 'templates/help-topic--bm_import.html.twig'
