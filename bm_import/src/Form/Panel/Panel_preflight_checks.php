@@ -1,5 +1,6 @@
 <?php
 
+
 /*
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
    Created on 2024-12-16 at 11:20:36
@@ -9,6 +10,8 @@ namespace Drupal\bm_import\Form\Panel;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Logger\LoggerChannelFactory;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Exception;
@@ -23,7 +26,8 @@ use Exception;
  * - Keeps existing helper function calls (bm_d, bm_main_panel_title_and_help, etc.)
  *   assuming they remain available globally in the site.
  */
-class Panel_preflight_checks extends FormBase {
+class Panel_preflight_checks extends FormBase
+{
 
   /**
    * The bm_import manager service (the service that exposes getInstance()).
@@ -33,21 +37,15 @@ class Panel_preflight_checks extends FormBase {
    *
    * @var mixed
    */
-  private $bmImportManager;
+  private mixed $bmImportManager;
 
   /**
    * The BMImport instance returned from the manager's getInstance().
    *
    * @var mixed
    */
-  private $BMImport;
+  private ?object $BMImport = NULL;
 
-  /**
-   * Messenger service.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
-   */
-  private MessengerInterface $messenger;
 
   /**
    * Preflight status flag.
@@ -56,34 +54,30 @@ class Panel_preflight_checks extends FormBase {
    */
   private bool $preflight_check_ok = FALSE;
 
-  /**
-   * Constructor.
-   *
-   * @param mixed $bm_import_manager
-   *   The bm_import manager service (service id: bm_import.manager).
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   Messenger service.
-   */
-  public function __construct($bm_import_manager, MessengerInterface $messenger) {
+
+
+  // protected MessengerInterface $messenger; is available via the FormBase
+  protected LoggerChannelInterface $logger;
+
+  public function __construct(mixed $bm_import_manager) {
     $this->bmImportManager = $bm_import_manager;
-    $this->messenger = $messenger;
+
+    $this->messenger()->addStatus('panel preflight checks have been successfully imported.');
+    $this->logger('Panel_preflight_checks')->notice('Panel preflight checks have been successfully imported.');
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    // Keep the manager service injected so we don't call \Drupal::service() in build.
+  public static function create(ContainerInterface $container): static {
     return new static(
-      $container->get('bm_import.manager'),
-      $container->get('messenger')
+      $container->get('bm_import.manager')
     );
+
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId(): string {
+  public function getFormId(): string
+  {
     return 'panel_preflight_checks';
   }
 
@@ -92,7 +86,8 @@ class Panel_preflight_checks extends FormBase {
    *
    * @throws \Exception
    */
-  public function buildForm(array $form, FormStateInterface $form_state): array {
+  public function buildForm(array $form, FormStateInterface $form_state): array
+  {
     // Debug helper (keeps existing project-specific debug usage).
     if (function_exists('bm_d') && function_exists('instantiateColor')) {
       bm_d('', instantiateColor('instantiated Panel_preflight_checks'));
@@ -103,13 +98,11 @@ class Panel_preflight_checks extends FormBase {
       // Preserve that call to remain compatible with existing manager implementation.
       if (is_object($this->bmImportManager) && method_exists($this->bmImportManager, 'getInstance')) {
         $this->BMImport = $this->bmImportManager->getInstance();
-      }
-      else {
+      } else {
         // If the service directly is the instance, use it.
         $this->BMImport = $this->bmImportManager;
       }
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       // Use the injected messenger service instead of \Drupal::messenger().
       $this->messenger->addError($e->getMessage());
     }
@@ -128,7 +121,8 @@ class Panel_preflight_checks extends FormBase {
    *
    * @throws \Exception
    */
-  private function form_panel_preflight_checks(array &$form): void {
+  private function form_panel_preflight_checks(array &$form): void
+  {
     if (function_exists('bm_d') && function_exists('traceColor')) {
       bm_d('', traceColor(' trace: ' . __FUNCTION__ . ' ' . time()));
     }
@@ -184,8 +178,7 @@ class Panel_preflight_checks extends FormBase {
         $form['panel_preflight-wrapper']['panel_preflight']['details']['data'] = $elements['form'];
       }
       $this->preflight_check_ok = TRUE;
-    }
-    else {
+    } else {
       $form['panel_preflight-wrapper']['panel_preflight']['todo'] = [
         '#type' => 'markup',
         '#markup' => '<div class="panel-preflight panel">' . $prefix,
@@ -206,7 +199,8 @@ class Panel_preflight_checks extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  public function submitForm(array &$form, FormStateInterface $form_state): void
+  {
     $form_state->setRebuild(TRUE);
   }
 
