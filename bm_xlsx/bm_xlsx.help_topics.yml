@@ -1,0 +1,5 @@
+bm_xlsx.overview:
+  title: 'BM XLSX — Spreadsheet helpers'
+  description: 'Helpers for reading/writing XLSX files used by import/export modules. Requires spreadsheet library & PHP zip/xml extensions.'
+  route_name: 'help.page'
+  file: 'templates/help-topic--bm_xlsx.html.twig'
