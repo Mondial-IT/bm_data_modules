@@ -23,7 +23,7 @@ class Panel_mandatory_fields extends FormBase {
   /**
    * @inheritDoc
    */
-  public function getFormId(): string {
+  public function getFormId():string {
     return 'panel_mandatory_fields';
   }
   private BMImport $BMImport;

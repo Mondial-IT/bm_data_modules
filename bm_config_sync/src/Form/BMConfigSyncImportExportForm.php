@@ -7,7 +7,7 @@
 namespace Drupal\bm_config_sync\Form;
 
 use Drupal;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportNodeHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportNodeHandler;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -86,7 +86,7 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
     $nodeHandler= new BMImportNodeHandler();
     $entitiesList=[];
     try {
-      $entitiesList = $nodeHandler->get_contentTypes();
+      $entitiesList = $nodeHandler->list_node_types();
     }catch (\Exception $exception){
       Drupal::messenger()->addError($exception->getMessage());
     }

@@ -6,7 +6,6 @@
 
 namespace Drupal\bm_import\BMImportHandlers;
 
-use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
 use Drupal;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;

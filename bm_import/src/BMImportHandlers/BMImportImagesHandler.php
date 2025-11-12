@@ -11,8 +11,6 @@ use Drupal\node\NodeInterface;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use function Drupal\bm_import\BMImportHandlers\file_save_data;
-use const Drupal\bm_import\BMImportHandlers\FILE_STATUS_PERMANENT;
 
 /**
  * Class BMImportImagesHandler

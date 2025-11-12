@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\bm_import\Test\src\unit;
+namespace Drupal\Tests\bm_import\Unit;
 
 use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
 use Drupal\paragraphs\Entity\Paragraph;

@@ -9,7 +9,6 @@ namespace Drupal\bm_import\Form;
 use Drupal;
 use Drupal\bm_import\BMImportConfigHandler\BMImportConfigHandler;
 
-use Drupal\bm_import\Form\BMImportNodeHandler;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -25,7 +24,7 @@ class BMImportConfigImportForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId(): string {
+  public function getFormId() {
     return 'bm_import_import_form';
   }
 
@@ -85,7 +84,7 @@ class BMImportConfigImportForm extends ConfigFormBase {
     $panel = [
       '#attributes' => ['class' => ['table-select-panel']],
     ];
-    $nodeHandler = new BMImportNodeHandler();
+    $nodeHandler = new BMImportConfigHandler();
     $entitiesList = [];
     try {
       $entitiesList = $nodeHandler->list_content_type_configurations();

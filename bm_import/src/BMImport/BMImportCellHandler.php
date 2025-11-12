@@ -2,7 +2,6 @@
 
 namespace Drupal\bm_import\BMImport;
 
-use Drupal\bm_import\BMImport\BMImport;
 use Drupal;
 use Drupal\taxonomy\Entity\Term;
 

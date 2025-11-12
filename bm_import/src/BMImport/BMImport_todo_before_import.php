@@ -2,8 +2,6 @@
 
 namespace Drupal\bm_import\BMImport;
 
-use Drupal\bm_import\BMImport\BMImport;
-use Drupal\bm_import\BMImport\BMImportCreator;
 use Drupal;
 use Drupal\bm_import\BMImportHandlers\BMImportFieldCreator;
 use Drupal\bm_import\BMImportHandlers\BMImportNodeHandler;

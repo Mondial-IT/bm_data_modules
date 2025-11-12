@@ -1,7 +1,7 @@
-name: 'Blue Marloc Config Sync'
+name: 'Configurations export and import Module'
 type: module
-description: 'A module to compare and synchronize configuration UUIDs between two directories.'
-core_version_requirement: ^11
-package: Mondial-IT
+description: 'A module to compare and synchronize configurations and display ERD.'
+core_version_requirement: 11.x
+package: Blue Marloc
 dependencies:
   - drupal:config

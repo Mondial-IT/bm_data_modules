@@ -54,7 +54,7 @@ class BMConfigSyncHandler {
   /**
    * Export form and view display configurations for paragraph field references.
    */
-  public function exportParagraphDependencies(string $paragraph_type): string {
+  public function exportParagraphDependencies($paragraph_type): string {
     $exportedYML = '';
     try {
       // Export the field storage and field configurations for the paragraph type
@@ -72,9 +72,9 @@ class BMConfigSyncHandler {
       // Export the form display and view display for the paragraph type
       $exportedYML .= $this->configuration_item_exporter('core.entity_form_display.paragraph.' . $paragraph_type . '.default');
       $exportedYML .= $this->configuration_item_exporter('core.entity_view_display.paragraph.' . $paragraph_type . '.default');
-    }
-    catch (InvalidPluginDefinitionException|PluginNotFoundException $e) {
+    } catch (Drupal\facets\Exception\Exception $e) {
       Drupal::messenger()->addError($e->getMessage());
+    } catch (InvalidPluginDefinitionException|PluginNotFoundException $e) {
     }
     return $exportedYML;
   }
@@ -82,7 +82,7 @@ class BMConfigSyncHandler {
   /**
    * Export all dependencies for the content type, including fields, form displays, and view displays.
    */
-  public function exportContentTypeDependencies(string $content_type): string {
+  public function exportContentTypeDependencies($content_type): string {
     $exportedYML = '';
 
     // Export the field storage and field configurations for the content type
@@ -112,7 +112,7 @@ class BMConfigSyncHandler {
   /**
    * Export all dependencies for the vocabulary, including field storage.
    */
-  public function exportVocabularyDependencies(string $vocabulary): string {
+  public function exportVocabularyDependencies($vocabulary): string {
     $exportedYML = '';
     try {
       // Load all field instances for the taxonomy term entity type
@@ -147,7 +147,7 @@ class BMConfigSyncHandler {
    *
    * @return string
    */
-  public function configuration_item_exporter(string $item_name): string {
+  public function configuration_item_exporter($item_name): string {
     // Get the active configuration storage.
     $activeStorage = \Drupal::service('config.storage');
     // Get the sync directory path from settings.php.
@@ -185,7 +185,7 @@ class BMConfigSyncHandler {
       if (is_array($data)) {
 
         // add to the ERD builder array
-          $this->populate_combinedERD_ERD_per_bundle($item_name, $data);
+        $this->populate_combinedERD_ERD_per_bundle($item_name, $data);
 
 
         $syncStorage->write($dependency, $data);
@@ -238,12 +238,13 @@ class BMConfigSyncHandler {
    * @return array
    */
   public function get_type_fields(string $keyFilter): array {
+
     return array_filter($this->fields,
-      static function ($data, $key) use ($keyFilter) {
-        // Check if the key starts with the bundleFilter
-        $entity = explode('|', $key)[0];
-        return $entity === $keyFilter;
-      }, ARRAY_FILTER_USE_BOTH);
+      function ($data, $key) use ($keyFilter) {
+      // Check if the key starts with the bundleFilter
+      $entity = explode('|', $key)[0];
+      return $entity === $keyFilter;
+    }, ARRAY_FILTER_USE_BOTH);
   }
 
   /**
@@ -264,12 +265,13 @@ class BMConfigSyncHandler {
    *
    * @return array
    */
-  public function get_type_bundles(string $bundleFilter = ''): array {
+  public
+  function get_type_bundles(string $bundleFilter=''): array {
     return array_filter($this->bundles,
-      static function ($bundle, $key) use ($bundleFilter) {
-        // Check if the key starts with the bundleFilter
-        return $bundleFilter === '' || str_starts_with($key, $bundleFilter);
-      }, ARRAY_FILTER_USE_BOTH);
+      function ($bundle, $key) use ($bundleFilter) {
+      // Check if the key starts with the bundleFilter
+      return str_starts_with($key, $bundleFilter);
+    }, ARRAY_FILTER_USE_BOTH);
   }
 
   /**
@@ -298,14 +300,12 @@ class BMConfigSyncHandler {
    *
    * @return array
    */
-  public function get_combined_field_paths(string $bundleFilter = ''): array {
+  public
+  function get_combined_field_paths($bundleFilter=''): array {
     $combinedERD = $this->getCombinedERD();
-    $field_paths = [];
-    foreach ($combinedERD as $ERD) {
-      if ($bundleFilter !== '' && !str_starts_with($ERD['field_path'], $bundleFilter)) {
-        continue;
-      }
-      $field_paths[] = $ERD['field_path'];
+    $field_paths=[];
+    foreach($combinedERD as $ERD){
+      $field_paths[]= $ERD['field_path'];
     }
     return $field_paths;
   }
@@ -316,16 +316,17 @@ class BMConfigSyncHandler {
    *
    * @return void
    */
-  public function populate_all_fields_and_bundle_names(): void {
+  public
+  function populate_all_fields_and_bundle_names(): void {
     $this->fields = [];
     $allBundles = [];
 
     // from cache
     $cache = Drupal::cache('bluemarloc')->get('bm_config_sync');
-    if ($cache) {
-      $this->fields = $cache->data['fields'] ?? [];
-      $this->bundles = $cache->data['bundles'] ?? [];
-      if ($this->fields) {
+    if($cache){
+      $this->fields = $cache->data['fields']??false;
+      $this->bundles = $cache->data['bundles']??false;
+      if($this->fields){
         return;
       }
     }
@@ -369,9 +370,8 @@ class BMConfigSyncHandler {
           }
         }
       }
-    }
-    catch (\Exception $e) {
-      Drupal::messenger()->addError(sprintf('Failed to retrieve fields: %s', $e->getMessage()));
+    } catch (\Exception $e) {
+      Drupal::messenger()->addError($this->t('Failed to retrieve fields: @error', ['@error' => $e->getMessage()]));
     }
 
     $this->bundles = $allBundles;
@@ -384,7 +384,7 @@ class BMConfigSyncHandler {
     ];
     Drupal::cache('bluemarloc')->set(
       'bm_config_sync',
-      ['fields' => $this->fields, 'bundles' => $this->bundles],
+      ['fields'=>$this->fields, 'bundles'=>$this->bundles],
       Cache::PERMANENT,
       $cache_tags);
   }
@@ -444,15 +444,14 @@ class BMConfigSyncHandler {
    *
    * @return void
    */
-  public function populate_combinedERD_ERD_per_bundle($items, int $depth = 0, string $field_path = ''): void {
-    if ($depth > 10 && function_exists('bm_d')) {
-      bm_d('', '', 'at ' . $field_path . '  depth > 10 loop warning?', 'dsm');
+  public function populate_combinedERD_ERD_per_bundle($items, $depth=0, $field_path=''): void {
+//    bm_d('', $items, 'items', 'dsm');
+    if($depth>10){
+      bm_d('','', 'at '.$field_path.'  depth > 10 loop warning?', 'dsm');
 
     }
-    if ($depth > 20) {
-      if (function_exists('bm_d')) {
-        bm_d('', '', 'at ' . $field_path . '  depth > 20 loop error?', 'dsm');
-      }
+    if($depth>20){
+      bm_d('','', 'at '.$field_path.'  depth > 20 loop error?', 'dsm');
       return;
     }
 
@@ -512,7 +511,7 @@ class BMConfigSyncHandler {
         '<a href="/admin/structure/types/manage/'.$field_instance_data['bundle'].'/fields/'. $field_storage_data['entity_type'].'.'.$field_instance_data['bundle'].'.'.$field_instance_data['field_name'].'">Edit</a>';
 
       $settings = $field_instance_data['settings'];
-      switch ($this->combinedERD[$data['machineName']]['field_type']) {
+      switch($this->combinedERD[$data['machineName']]['field_type']){
         // paragraph on lower level
         case 'entity_reference_revisions':
           // add edit link
@@ -527,11 +526,13 @@ class BMConfigSyncHandler {
 
           // process children
           $paragraphs = $settings['handler_settings']['target_bundles'];
-          foreach ($paragraphs as $paragraph) {
-            $this->combinedERD[$data['machineName']]['children'] .= ' ' . $paragraph;
-            $this->ERD[$data['bundle']][$data['machineName']]['children'] .= ' ' . $paragraph;
+          foreach($paragraphs as $paragraph){
+            $this->combinedERD[$data['machineName']]['children'] .=' '. $paragraph;
+            $this->ERD[$data['bundle']][$data['machineName']]['children'].=' '. $paragraph;
+            //bm_d('',$paragraph, 'contains paragraph', 'dsm');
             $fields = $this->get_type_fields($paragraph);
-            $this->populate_combinedERD_ERD_per_bundle($fields, $depth + 1, $this->combinedERD[$data['machineName']]['field_path'] . '.');
+            // bm_d('', $fields, 'paragraph fields', 'dsm');
+            $this->populate_combinedERD_ERD_per_bundle($fields, $depth+1, $this->combinedERD[$data['machineName']]['field_path'].'.');
           }
           break;
         // node and taxonomy on lower level
@@ -546,11 +547,13 @@ class BMConfigSyncHandler {
 
             $vocabularies = $settings['handler_settings']['target_bundles'];
             foreach ($vocabularies as $vocabulary) {
-              $this->combinedERD[$data['machineName']]['children'] .= ' ' . $vocabulary;
-              $this->ERD[$data['bundle']][$data['machineName']]['children'] .= ' ' . $vocabulary;
+              $this->combinedERD[$data['machineName']]['children'] .=' '. $vocabulary;
+              $this->ERD[$data['bundle']][$data['machineName']]['children'].=' '. $vocabulary;
 
-              $fields = $this->get_type_fields($vocabulary);
-              $this->populate_combinedERD_ERD_per_bundle($fields, $depth + 1, $this->combinedERD[$data['machineName']]['field_path'] . '.');
+              //   bm_d('',$vocabulary, 'contains vocabulary', 'dsm');
+              $fields  = $this->get_type_fields($vocabulary);
+           //   bm_d('',$fields, 'taxonomy fields','dsm');
+              $this->populate_combinedERD_ERD_per_bundle($fields, $depth+1, $this->combinedERD[$data['machineName']]['field_path'].'.');
             }
           }else{
             // node reference default:node
@@ -564,8 +567,8 @@ class BMConfigSyncHandler {
               }
               $contentTypes = $settings['handler_settings']['target_bundles'];
               foreach ($contentTypes as $contentType) {
-                $this->combinedERD[$data['machineName']]['children'] .= ' ' . $contentType;
-                $this->ERD[$data['bundle']][$data['machineName']]['children'] .= ' ' . $contentType;
+                $this->combinedERD[$data['machineName']]['children'] .=' '. $contentType;
+                $this->ERD[$data['bundle']][$data['machineName']]['children'] .=' '. $contentType;
                 break;
               }
             }
@@ -601,14 +604,14 @@ class BMConfigSyncHandler {
       'entity_type' => 'entity_type',
       'depth' => 'depth',
       'field_name' => 'field_name',
-      'type' => 'type',
+      // same as field_type      'type' => $field_storage_data['type'] ?? '',
       'field_type' => 'field_type',
       'langcode' => 'langcode',
       'help' => 'help',
-      'name' => 'name',
+      'name' => 'help',
       'settings' => 'settings',
       'children' => 'children',
-      'edit' => 'edit',
+      'edit'=>'edit'
     ];
   }
 

@@ -5,28 +5,23 @@
  */
 
 
-namespace Drupal\bm_import\Test\src\unit;
-
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\bm_import\Test\src\unit\BMImportParagraphHandlerTest;
+use Drupal\Tests\bm_import\Unit\BMImportParagraphHandlerTest;
 
-class BMImportParagraphHandlerTestForm extends FormBase
-{
+class BMImportParagraphHandlerTestForm extends FormBase {
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId(): string
-  {
+  public function getFormId(): string {
     return 'bm_import_paragraph_handler_test_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state): array
-  {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     // Test data input fields.
     $form['test_data'] = [
       '#type' => 'fieldset',
@@ -89,7 +84,7 @@ class BMImportParagraphHandlerTestForm extends FormBase
           'last_run' => '-',
           'status' => '-',
         ],
-        'testCreateNestedParagraph' => ['test_name' => $this->t('Create Nested Paragraph'),
+        'testCreateNestedParagraph' => [          'test_name' => $this->t('Create Nested Paragraph'),
           'last_run' => '-',
           'status' => '-',
         ],
@@ -113,8 +108,7 @@ class BMImportParagraphHandlerTestForm extends FormBase
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void
-  {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $selected_tests = array_filter($form_state->getValue('run_tests'));
     $handlerTest = new BMImportParagraphHandlerTest();
 

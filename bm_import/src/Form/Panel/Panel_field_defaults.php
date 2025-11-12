@@ -104,7 +104,7 @@ class Panel_field_defaults extends FormBase {
   /**
    * @inheritDoc
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $form_state->setRebuild(true);
   }
 

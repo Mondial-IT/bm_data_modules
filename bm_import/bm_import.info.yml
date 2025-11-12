@@ -1,8 +1,8 @@
-name: Blue Marloc Import Module
-description: Support for importing content
-package: bluemarloc
+name: Import Module
+description: Importing complex entity content from spreadsheet files.
+package: Blue Marloc
 type: module
 version: "1.0"
-core_version_requirement: ^11
+core_version_requirement: 11.x
 dependencies:
   - drupal:field

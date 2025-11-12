@@ -2,7 +2,6 @@
 
 namespace Drupal\bm_import\BMImport;
 
-use Drupal\bm_import\BMImport\BMImport;
 use Drupal;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
@@ -87,5 +86,5 @@ class BMImportBatch {
   }
 
 
-
+ 
 }

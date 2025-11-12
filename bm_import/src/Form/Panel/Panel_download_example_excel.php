@@ -13,21 +13,21 @@ use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 
-class Panel_download_example_excel extends FormBase {
+class Panel_download_example_excel extends FormBase{
 
   private BMImport $BMImport;
 
   /**
    * @inheritDoc
    */
-  public function getFormId(): string {
+  public function getFormId() {
     return 'panel_download_example_excel';
   }
 
   /**
    * @inheritDoc
    */
-  public function buildForm(array $form, FormStateInterface $form_state): array {
+  public function buildForm(array $form, FormStateInterface $form_state) {
     bm_d('', instantiateColor('instantiated Panel_mandatory_fields'));
 
     $this->BMImport = \Drupal::service('bm_import.manager')->getInstance();
@@ -69,7 +69,7 @@ class Panel_download_example_excel extends FormBase {
   /**
    * @inheritDoc
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $form_state->setRebuild(true);
   }
 

@@ -1,7 +1,7 @@
 bm_config_sync.bluemarloc:
   title: 'bm_config_sync'
   description: 'config bm_config_sync'
-  parent: bm_main.bluemarloc_developer
+  parent: bm_main.bluemarloc_admin
   route_name: bm_config_sync.settings_form
   weight: 1
 #

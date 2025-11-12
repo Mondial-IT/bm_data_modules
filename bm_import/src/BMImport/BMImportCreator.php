@@ -119,7 +119,7 @@ class BMImportCreator {
    * @return void
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function create_vocabulary(string $vocabularyName, ?string $vocabularyLabel = null): void {
+  public function create_vocabulary(string $vocabularyName, string $vocabularyLabel=null): void {
     $this->vocabularyHandler->createVocabulary($vocabularyName, $vocabularyLabel??$vocabularyName);
   }
   /**

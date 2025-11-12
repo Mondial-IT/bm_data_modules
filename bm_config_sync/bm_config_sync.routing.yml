@@ -46,7 +46,7 @@ bm_config_sync.bm_config_sync_import_form:
   path: '/admin/config/system/bm_config_sync_import'
   defaults:
     _title: 'bm_config_sync_import form'
-    _form: 'Drupal\bm_config_sync\Form\BMConfigSyncImportForm'
+    _form: 'Drupal\bm_config_sync\Form\ConfigSyncImportForm'
   requirements:
     _permission: 'administer bm_config_sync configuration'
 
@@ -54,7 +54,7 @@ bm_config_sync.bm_config_sync_import_export_form:
   path: '/admin/config/system/bm_config_sync_import_export'
   defaults:
     _title: 'bm_config_sync_import_export form'
-    _form: 'Drupal\bm_config_sync\Form\BMConfigSyncImportExportForm'
+    _form: 'Drupal\bm_config_sync\Form\ConfigSyncImportExportForm'
   requirements:
     _permission: 'administer bm_config_sync configuration'
 

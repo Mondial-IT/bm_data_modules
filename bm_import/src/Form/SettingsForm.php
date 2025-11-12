@@ -23,7 +23,7 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId(): string {
+  public function getFormId() {
     return 'bm_template_form';
   }
 

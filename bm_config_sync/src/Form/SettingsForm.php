@@ -6,19 +6,18 @@
 
 namespace Drupal\bm_config_sync\Form;
 
+
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
+
+
 /**
- * Provides a basic settings container for bm_config_sync.
+ * Configure bm_debug settings for this site.
  */
 class SettingsForm extends ConfigFormBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEditableConfigNames(): array {
-    return ['bm_config_sync.settings'];
+  protected function getEditableConfigNames() {
+    // TODO: Implement getEditableConfigNames() method.
   }
 
   /**
@@ -28,14 +27,21 @@ class SettingsForm extends ConfigFormBase {
     return 'bm_config_sync_settings';
   }
 
+
+
   /**
    * {@inheritdoc}
+   * @noinspection PhpMultipleClassDeclarationsInspection
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $form['intro'] = [
-      '#type' => 'markup',
-      '#markup' => '<h1>Config Sync settings</h1><hr><p>Configure bm_config_sync behaviour.</p>',
+
+    //dsm($debugInfo);
+    $form['intro']=[
+      '#type'=>'markup',
+      '#markup'=>'<h1>Config Sync settings</h1><hr>
+        <p></p>'
     ];
+
 
     return parent::buildForm($form, $form_state);
   }
@@ -43,8 +49,10 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
-    parent::submitForm($form, $form_state);
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+
   }
+
+
 
 }

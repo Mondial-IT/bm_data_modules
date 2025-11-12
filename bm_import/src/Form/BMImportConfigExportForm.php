@@ -41,7 +41,7 @@ class BMImportConfigExportForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId(): string {
+  public function getFormId() {
     return 'bm_import_export_form';
   }
 

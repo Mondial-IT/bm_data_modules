@@ -2,10 +2,8 @@
 
 namespace Drupal\bm_import\BMImportHandlers;
 
-use Drupal\bm_import\BMImportHandlers\BMImportImagesHandler;
 use Drupal;
 use Drupal\bm_google_places\GooglePlace\GooglePlace;
-use Drupal\bm_import\BMImportHandlers\BMImportCreator;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityStorageException;

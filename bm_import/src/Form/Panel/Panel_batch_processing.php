@@ -161,7 +161,7 @@ class Panel_batch_processing extends FormBase {
   /**
    * @inheritDoc
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $input = $form_state->getUserInput();
     // note, usually we handle actions in the buildForm,
     // however this button, is not ajax'd and handled here.

@@ -1,5 +1,0 @@
-services:
-  Drupal\bm_config_sync\Handler\BMConfigSyncHandler:
-    autowire: true
-    autoconfigure: true
-    public: true

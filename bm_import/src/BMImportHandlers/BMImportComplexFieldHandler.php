@@ -2,9 +2,6 @@
 
 namespace Drupal\bm_import\BMImportHandlers;
 
-use Drupal\bm_import\BMImportHandlers\BMImportNodeHandler;
-use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
-use Drupal\bm_import\BMImportHandlers\BMImportVocabularyHandler;
 use Drupal;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageException;

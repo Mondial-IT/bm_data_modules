@@ -213,7 +213,7 @@ class BMXLSX {
    *
    * @return array|null
    */
-  public function getColors($sheet, ?int $rowStart = null, ?int $rowEnd = null, ?int $columnIndex = null): ?array {
+  public function getColors($sheet, int $rowStart=null, int $rowEnd=null, int $columnIndex=null): ?array {
 
     if($rowStart===null)$rowStart=0;
     if($rowEnd===null)$rowEnd=1000000;

@@ -2,7 +2,6 @@
 
 namespace Drupal\bm_import\BMImportHandlers\unit;
 
-use Drupal\bm_import\BMImportHandlers\unit\BMImportParagraphHandlerTest;
 use Drupal;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;

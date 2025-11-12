@@ -106,7 +106,7 @@ class Panel_inspector extends FormBase{
   /**
    * @inheritDoc
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
    // bm_d('',traceColor(' trace: ' . __FUNCTION__ . ' panel_inspector ' . time()));
 
     $form_state->setRebuild(true);

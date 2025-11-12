@@ -2,7 +2,6 @@
 
 namespace Drupal\bm_import\BMImport;
 
-use Drupal\bm_import\BMImport\BMImport;
 use Drupal;
 use Drupal\bm_debug\BMDebugInfo\BMDebugInfo;
 use Drupal\bm_import\BMImportHandlers\BMImportYMLHandler;
@@ -10,7 +9,6 @@ use Drupal\Core\Database\Database;
 use Drupal\Core\Render\Markup;
 use Drupal\node\Entity\Node;
 use Exception;
-use function Drupal\bm_import\BMImport\bm_d_sql;
 
 /**
  * * This class has the methods to check the Excel rows against itself and against existing nodes.
@@ -386,7 +384,7 @@ bm_d('',$this->existingNodesMatchTable,'existingNodesMatchTable existingNodesMat
    *
    * @return BMImportInspector
    */
-  static public function get(?BMImport $BMImport = NULL): BMImportInspector {
+  static public function get(BMImport $BMImport = NULL): BMImportInspector {
     if (!isset(BMImportInspector::$instance)) {
       BMImportInspector::$instance = new BMImportInspector($BMImport);
     }

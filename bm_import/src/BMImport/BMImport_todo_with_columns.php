@@ -2,9 +2,6 @@
 
 namespace Drupal\bm_import\BMImport;
 
-use Drupal\bm_import\BMImport\BMImport;
-use Drupal\bm_import\BMImport\BMImportCellHandler;
-use Drupal\bm_import\BMImport\BMImportCreator;
 use Drupal;
 use Drupal\bm_debug\BMDebugInfo\BMDebugInfo;
 use Drupal\bm_import\BMImportHandlers\BMImportFieldCreator;

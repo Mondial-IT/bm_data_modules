@@ -6,7 +6,6 @@
 
 namespace Drupal\bm_import\BMImportHandlers;
 
-use Drupal\bm_import\Form\SettingsForm;
 use Drupal;
 use Drupal\bm_debug\BMDebugInfo\BMDebugInfo;
 use Drupal\bm_import\BMImport\BMImport;

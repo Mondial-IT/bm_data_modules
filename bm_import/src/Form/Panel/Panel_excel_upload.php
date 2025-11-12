@@ -59,7 +59,7 @@ class Panel_excel_upload extends FormBase{
   /**
    * @inheritDoc
    */
-  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $form_state->setRebuild(true);
   }
 
