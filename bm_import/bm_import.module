@@ -1,0 +1,115 @@
+<?php /** @noinspection PhpUnused */
+
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+
+use Drupal\Core\Entity\EntityStorageException;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+//
+//function bm_import_page_attachments(array &$page): void {
+//  $page['#attached']['library'][] = 'bm_import/bm_import';
+//}
+
+function bm_import_help($route_name, RouteMatchInterface $route_match): string|TranslatableMarkup {
+  return match ($route_name) {
+    'help.page.bm_import' => t('
+                <h2>Help for importing listing content.</h2>
+                <h3>Available in BMimport::</h3>'),
+    default => '',
+  };
+
+}
+
+/**
+ * @throws EntityStorageException
+ */
+function repairConfigError(){
+
+  // Define the bundle and fields.
+  $bundle = 'listing';
+  $entity_type = 'node'; // Replace with your entity type.
+
+  $fields = [
+    'field_listing_no_of_offices' => [
+      'type' => 'string_textfield',
+      'settings' => [],
+      'weight' => 0,
+    ],
+    // Add other fields as needed.
+  ];
+
+  // Rebuild view display.
+  $view_display = EntityViewDisplay::create([
+    'targetEntityType' => $entity_type,
+    'bundle' => $bundle,
+    'mode' => 'default',
+    'content' => $fields,
+  ])->save();
+
+  // Rebuild form display.
+  $form_display = EntityFormDisplay::create([
+    'targetEntityType' => $entity_type,
+    'bundle' => $bundle,
+    'mode' => 'default',
+    'content' => $fields,
+  ])->save();
+}
+
+try {
+ // repairConfigError();
+} catch (EntityStorageException $e) {
+  Drupal::messenger()->addError($e->getMessage());
+}
+
+/**
+ * Standardizing the reporting and messages displays
+ * @param $text
+ *
+ * @return string
+ */
+function traceColor($text): string {
+  return '<div class="fgcolor-violet">' . $text . '</div>';
+}
+function warningColor($text): string {
+  return '<div class="fgcolor-orange">' . $text . '</div>';
+}
+function errorColor($text): string {
+  return '<div class="fgcolor-red">' . $text . '</div>';
+}
+function instantiateColor($text): string {
+  return '<div class="bgcolor-blue fgcolor-white">' . $text . '</div>';
+}
+function violetColor($text): string {
+  return '<span class="fgcolor-violet">' . $text . '</span>';
+}
+function blueColor($text): string {
+  return '<span class="fgcolor-blue">' . $text . '</span>';
+}
+function greenColor($text): string {
+  return '<span class="fgcolor-green">' . $text . '</span>';
+}
+function orangeColor($text): string {
+  return '<span class="fgcolor-orange">' . $text . '</span>';
+}
+function greenWColor($text): string {
+  return '<span class="bgcolor-green fgcolor-white">' . $text . '</span>';
+}
+function orangeWColor($text): string {
+  return '<span class="bgcolor-orange fgcolor-white">' . $text . '</span>';
+}
+
+function bm_import_theme(): array {
+  $module_path = \Drupal::service('extension.path.resolver')
+    ->getPath('module', 'bm_import');
+
+  return [
+    'bm_import_management_form' => [
+      'render element' => 'form', // Crucial for passing the form as a renderable element.
+      'template' => 'bm-import-management-form',
+      'path' => $module_path . '/templates',
+    ],
+  ];
+}
+
+//'modules/custom/bm_import/templates/bm-import-management-form.html.twig'
