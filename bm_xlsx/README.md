@@ -1,35 +1,36 @@
-# bm_xlsx
+# Blue Marloc Excel API
 
-Module purpose
-- Helper utilities for reading/writing XLSX files, or providing integration with spreadsheet imports/exports.
+## Overview
+Blue Marloc Excel API exposes helper services and forms for uploading XLSX spreadsheets, inspecting sheet metadata, and extracting row level data used by other Blue Marloc modules.
 
-Compatibility
-- Target Drupal versions: Drupal 10 and Drupal 11.
-- PHP: Compatible with PHP 8.3. Use a maintained library for XLSX handling (eg. phpoffice/phpspreadsheet).
+## Compatibility
+- **Drupal core:** 11.x
+- **PHP:** 8.3+
+- Bundles the `shuchkin/simplexlsx` library within the module’s `vendor` directory.
 
-Installation
-1. Place the module in modules/custom/bm_xlsx.
-2. Install library dependencies, e.g.:
-  - `composer require phpoffice/phpspreadsheet`
-3. Enable the module: `drush en bm_xlsx -y`.
+## Installation
+1. Copy the module to `modules/custom/bm_xlsx`.
+2. Enable via the UI or using Drush:
+   ```bash
+   drush en bm_xlsx
+   ```
 
-Upgrade notes (D9 -> D11)
-- Ensure the XLSX library supports PHP 8.3.
-- Replace any deprecated Drupal APIs in module code.
-- Use dependency injection and ensure all properties are declared (PHP 8.3 dynamic property issues).
+## Configuration & Usage
+- The settings form at `/admin/config/development/bm-xlsx/settings` lets administrators upload an XLSX file, select a worksheet, and preview styled data.
+- Uploaded files are managed through Drupal’s file API; ensure allowed file extensions include `xlsx`.
+- The `BMXLSX` service exposes methods such as `getSheetNames()` and `getColors()` for developers to consume in custom workflows.
 
-Developer notes
-- Use streamed reads for large spreadsheets to reduce memory usage.
-- Provide configuration options for column mappings and character encodings.
+## Developer Notes
+- Service definitions live in `bm_xlsx.services.yml`. Reuse `Drupal\bm_xlsx\BMXLSX\BMXLSX` in other modules through dependency injection.
+- The included vendor library has been adjusted for PHP 8.3 nullable parameter requirements. Keep local modifications in mind when updating the library.
 
-Operational/DevOps notes
-- Ensure enough memory for large exports or use chunked processing.
-- Verify PHP extensions (zip, xml) required by spreadsheet libraries are enabled.
+## DevOps Guidance
+- Temporary uploads are stored in Drupal’s default file scheme. Confirm that cron jobs or CLI importers use the same scheme to avoid missing files.
+- Large spreadsheets may require increased PHP memory limits; monitor usage during heavy imports.
 
-Troubleshooting
-- If reading fails, inspect file format (sometimes CSV renamed as XLSX).
-- Ensure libraries are correctly installed via Composer.
-
-Recommended checks (run locally)
-- Create sample XLSX files and run import/export flows.
-- Run static analyzers and unit tests if present.
+## Testing
+- Validate PHP syntax after modifications:
+  ```bash
+  php -l $(git ls-files "bm_xlsx/*.php" "bm_xlsx/src/**/*.php")
+  ```
+- Exercise the upload form in a non-production environment to confirm server level dependencies (file permissions, max upload size) are satisfied.

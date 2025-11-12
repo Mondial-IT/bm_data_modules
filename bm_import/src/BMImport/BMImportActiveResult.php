@@ -1,5 +1,5 @@
 <?php
-namespace bmDataModules\bm_import\src\BMImport;
+namespace Drupal\bm_import\BMImport;
 
 use Drupal\node\Entity\Node;
 use Exception;

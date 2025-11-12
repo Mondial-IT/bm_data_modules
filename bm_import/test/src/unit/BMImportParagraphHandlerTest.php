@@ -1,8 +1,8 @@
 <?php
 
-namespace bmDataModules\bm_import\test\src\unit;
+namespace Drupal\bm_import\Test\src\unit;
 
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
 use Drupal\paragraphs\Entity\Paragraph;
 use Drupal\node\Entity\Node;
 use Drupal\Core\Entity\EntityStorageException;

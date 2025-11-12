@@ -5,13 +5,13 @@
 
 /** @noinspector PhpUnused */
 
-namespace bmDataModules\bm_import\src\Form;
+namespace Drupal\bm_import\Form;
 
 use Drupal;
 use Drupal\bm_debug\BMDebugInfo\BMDebugInfo;
-use bmDataModules\bm_import\src\BMImport\BMImport;
-use bmDataModules\bm_import\src\BMImport\BMImportBatch;
-use bmDataModules\bm_import\src\Service\BMImportInstanceStorage;
+use Drupal\bm_import\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImportBatch;
+use Drupal\bm_import\Service\BMImportInstanceStorage;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -454,7 +454,7 @@ class BMImportManagementForm extends FormBase {
     bm_d(self::BM_D_TRACE, traceColor(' trace: ' . __FUNCTION__ . ' ' . time()));
     $form['panel_excel_upload'] = [
       '#type' => 'fieldset',
-      'form' => \Drupal::formBuilder()->getForm('bmDataModules\bm_import\src\Form\Panel\Panel_excel_upload'),
+      'form' => \Drupal::formBuilder()->getForm('Drupal\bm_import\Form\Panel\Panel_excel_upload'),
     ];
   }
 
@@ -474,7 +474,7 @@ class BMImportManagementForm extends FormBase {
     bm_d(self::BM_D_TRACE, traceColor(' trace: ' . __FUNCTION__ . ' ' . time()));
     $form['panel_preflight_checks'] = [
       '#type' => 'fieldset',
-      'form' => \Drupal::formBuilder()->getForm('bmDataModules\bm_import\src\Form\Panel\Panel_preflight_checks'),
+      'form' => \Drupal::formBuilder()->getForm('Drupal\bm_import\Form\Panel\Panel_preflight_checks'),
     ];
 
   }
@@ -492,7 +492,7 @@ class BMImportManagementForm extends FormBase {
     bm_d(self::BM_D_TRACE, traceColor(' trace: ' . __FUNCTION__ . ' ' . time()));
     $form['panel_field_defaults'] = [
       '#type' => 'fieldset',
-      'form' => \Drupal::formBuilder()->getForm('bmDataModules\bm_import\src\Form\Panel\Panel_field_defaults'),
+      'form' => \Drupal::formBuilder()->getForm('Drupal\bm_import\Form\Panel\Panel_field_defaults'),
     ];
 
   }
@@ -507,7 +507,7 @@ class BMImportManagementForm extends FormBase {
     // Embed Subform 1
     $form['panel_mandatory_fields'] = [
       '#type' => 'fieldset',
-      'form' => \Drupal::formBuilder()->getForm('bmDataModules\bm_import\src\Form\Panel\Panel_mandatory_fields'),
+      'form' => \Drupal::formBuilder()->getForm('Drupal\bm_import\Form\Panel\Panel_mandatory_fields'),
     ];
   }
 
@@ -525,7 +525,7 @@ class BMImportManagementForm extends FormBase {
 
     $form['panel_inspector'] = [
       '#type' => 'fieldset',
-      'form' => \Drupal::formBuilder()->getForm('bmDataModules\bm_import\src\Form\Panel\Panel_inspector'),
+      'form' => \Drupal::formBuilder()->getForm('Drupal\bm_import\Form\Panel\Panel_inspector'),
     ];
   }
 
@@ -540,7 +540,7 @@ class BMImportManagementForm extends FormBase {
     bm_d(self::BM_D_TRACE, traceColor(' trace: ' . __FUNCTION__ . ' ' . time()));
     $form['panel_batch_processing'] = [
       '#type' => 'fieldset',
-      'form' => \Drupal::formBuilder()->getForm('bmDataModules\bm_import\src\Form\Panel\Panel_batch_processing'),
+      'form' => \Drupal::formBuilder()->getForm('Drupal\bm_import\Form\Panel\Panel_batch_processing'),
     ];
 
   }
@@ -556,7 +556,7 @@ class BMImportManagementForm extends FormBase {
     bm_d(self::BM_D_TRACE, traceColor(' trace: ' . __FUNCTION__ . ' ' . time()));
     $form['panel_download_example_excel'] = [
       '#type' => 'fieldset',
-      'form' => \Drupal::formBuilder()->getForm('bmDataModules\bm_import\src\Form\Panel\Panel_download_example_excel'),
+      'form' => \Drupal::formBuilder()->getForm('Drupal\bm_import\Form\Panel\Panel_download_example_excel'),
     ];
 
   }

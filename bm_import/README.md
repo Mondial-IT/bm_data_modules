@@ -1,38 +1,39 @@
-# bm_import
+# Blue Marloc Import
 
-Module purpose
-- Import content or configuration from external sources (CSV/XLS/XLSX/other).
-- Designed to be used by site administrators to populate or update site data.
+## Overview
+The Blue Marloc Import module orchestrates batch creation and updating of Drupal content using structured spreadsheets, CSV files, and YAML configuration. It coordinates node, taxonomy, and paragraph operations while offering inspection and preflight tooling for editors.
 
-Compatibility
-- Target Drupal versions: Drupal 10 and Drupal 11.
-- PHP: Compatible with PHP 8.3; ensure PHP dependencies (like PHPExcel alternatives) support 8.3.
+## Compatibility
+- **Drupal core:** 11.x
+- **PHP:** 8.3+
+- Requires the Blue Marloc auxiliary modules that provide debugging (`bm_debug`), taxonomy helpers (`bm_taxonomies`), and listing features where referenced.
 
-Installation
-1. Place the module in modules/custom/bm_import or install via Composer if packaged.
-2. If the module depends on third-party libraries (e.g., PhpSpreadsheet), run Composer to install them:
-  - `composer require phpoffice/phpspreadsheet`
-3. Enable the module: `drush en bm_import -y`.
+## Installation
+1. Place the module in `modules/custom/bm_import`.
+2. Enable required dependencies, then enable the module:
+   ```bash
+   drush en bm_import
+   ```
+3. Grant access to the administration permissions exposed by the module.
 
-Upgrade notes (D9 -> D11)
-- Ensure all third-party libraries are compatible with PHP 8.3.
-- Replace any deprecated APIs (e.g., db_* wrappers, drupal_set_message) as noted in bm_config_sync README.
-- Validate file handling: use the managed file system and temporary directories per Drupal standards.
+## Configuration & Usage
+- The main management UI lives at **Content → Blue Marloc Import** and walks operators through upload, validation, and batch processing panels.
+- Define import blueprints under `config/install` and ensure referenced vocabularies, paragraphs, and content types exist before running imports.
+- Use the configuration export/import forms to sync import definitions between environments.
 
-Developer notes
-- Validate imported data thoroughly.
-- Use dependency injection to obtain file and database services.
-- Run imports as a QueueWorker or Batch API job for large imports to avoid timeouts.
+## Developer Notes
+- PHP namespaces follow Drupal standards (`Drupal\bm_import\…`). Custom services are declared in `bm_import.services.yml`.
+- Core import logic resides in `src/BMImport`. Handlers for specific entity types are under `src/BMImportHandlers`.
+- Debugging utilities rely on `bm_d()` hooks. Guard new calls with `function_exists('bm_d')` when integrating with deployments that may not include the debugging module.
 
-Operational/DevOps notes
-- Watch resource usage when performing large imports. Prefer queue/batch processing.
-- Ensure PHP memory and execution limits are adequate.
-- For production: run imports during low-traffic windows.
+## DevOps Guidance
+- Batch imports can be long-running; configure the PHP CLI timeout appropriately for Drush executions.
+- File uploads are stored via Drupal’s file API. Ensure temporary and permanent directories have sufficient space.
+- For reproducibility, store import spreadsheets and YAML definitions in version control or managed object storage.
 
-Troubleshooting
-- Logging: check watchdog / recent log messages for import errors.
-- File permissions: ensure temporary directories are writable by PHP.
-
-Recommended checks (run locally)
-- Run module import endpoints with small sample files first.
-- Run static analyzers (drupal-check, Rector, PHPStan).
+## Testing
+- Run static linting:
+  ```bash
+  php -l $(git ls-files "bm_import/*.php" "bm_import/src/**/*.php")
+  ```
+- Exercise batch flows on a staging environment. Monitor watchdog logs for exception messages during dry runs.

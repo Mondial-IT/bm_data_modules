@@ -4,7 +4,7 @@
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
  */
 
-namespace bmDataModules\bm_import\src\Form;
+namespace Drupal\bm_import\Form;
 
 use Drupal;
 use Drupal\bm_import\BMImportConfigHandler\BMImportConfigHandler;
@@ -25,7 +25,7 @@ class BMImportConfigImportForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'bm_import_import_form';
   }
 

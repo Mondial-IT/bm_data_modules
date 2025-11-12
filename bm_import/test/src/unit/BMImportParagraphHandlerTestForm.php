@@ -5,11 +5,11 @@
  */
 
 
-namespace bmDataModules\bm_import\test\src\unit;
+namespace Drupal\bm_import\Test\src\unit;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use bmDataModules\bm_import\test\src\unit\BMImportParagraphHandlerTest;
+use Drupal\bm_import\Test\src\unit\BMImportParagraphHandlerTest;
 
 class BMImportParagraphHandlerTestForm extends FormBase
 {

@@ -4,12 +4,12 @@
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
  */
 
-namespace bmDataModules\bm_import\src\BMImportHandlers;
+namespace Drupal\bm_import\BMImportHandlers;
 
-use bmDataModules\bm_import\src\Form\SettingsForm;
+use Drupal\bm_import\Form\SettingsForm;
 use Drupal;
 use Drupal\bm_debug\BMDebugInfo\BMDebugInfo;
-use bmDataModules\bm_import\src\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImport;
 use Symfony\Component\Yaml\Yaml;
 
 /**

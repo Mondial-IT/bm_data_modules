@@ -1,45 +1,39 @@
-# bm_config_sync
+# Blue Marloc Config Sync
 
-Module purpose
-- Synchronizes or helps manage configuration between environments.
-- Provides admin UI for exporting/importing or managing specific configuration items.
+## Overview
+The Config Sync module streamlines exporting, inspecting, and synchronizing configuration between environments. It includes tooling for building entity relationship diagrams (ERDs) of content model definitions and supports curated export flows for nodes, taxonomies, and paragraph types.
 
-Compatibility
-- Target Drupal versions: Drupal 10 and Drupal 11 (update core_version_requirement accordingly).
-- PHP: Compatible with PHP 8.3 (ensure you run static analysis after changes).
+## Compatibility
+- **Drupal core:** 11.x
+- **PHP:** 8.3+
+- Depends on the standard Drupal configuration system. Ensure `config_sync_directory` is writable for web and CLI users.
 
-Installation
-1. Place the module in the modules/custom/bm_config_sync directory or install via Composer if packaged.
-2. Run `composer install` (if the module has a composer.json).
-3. Enable the module: `drush en bm_config_sync -y` or use the admin UI.
+## Installation
+1. Copy the module into `modules/custom/bm_config_sync`.
+2. Enable it via the Drupal UI or run:
+   ```bash
+   drush en bm_config_sync
+   ```
+3. Confirm that the site configuration sync directory is configured in `settings.php`.
 
-Upgrade notes (D9 -> D11)
-- Updated APIs: This module may use deprecated Drupal 9 APIs (drupal_set_message(), variable_*(), db_*). These must be replaced with the messenger, Configuration API, and Database connection or injected services.
-- Routing: Ensure all routes in bm_config_sync.routing.yml use `_controller` and `_permission` (no access callback).
-- Services: Update bm_config_sync.services.yml to use autowire where possible and review constructor signatures on service classes.
-- PHP 8.x: Declare class properties explicitly to avoid dynamic property deprecation warnings.
+## Configuration & Usage
+- Navigate to **Configuration → Development → Config Sync** to access the ERD builder, UUID inspector, and batch export forms.
+- Use the settings form (`/admin/config/development/bm-config-sync/settings`) to access module level defaults.
+- Batch exports write into the configured sync directory. Ensure filesystem permissions allow both the web server and deployment automation to read/write.
 
-Developer notes
-- Prefer dependency injection for services in controllers and services.
-- Use StringTranslationTrait in service/controller classes and `$this->t()` for translation.
-- Escape all user output (Html::escape() or templates auto-escape).
-- If changing APIs or service IDs, update dependent code and documentation.
+## Developer Notes
+- Services are registered in `bm_config_sync.services.yml`. Dependency injection is available; avoid using the global `\Drupal` facade when extending functionality.
+- Review `src/Handler/BMConfigSyncHandler.php` for the ERD aggregation logic. Guard long-running operations with batch API if they are extended.
+- Twig overrides for batch progress live in `src/templates` and are registered through the module’s libraries file.
 
-Operational/DevOps notes
-- Config sync: If this module stores configuration that should be exported, commit exported YML into config repository.
-- Cron: If the module relies on periodic imports or tasks, ensure a cron job is configured and tested with the new PHP version.
-- PHP configuration: Test with PHP 8.3 and enable error reporting or monitoring to catch runtime deprecations.
+## DevOps Guidance
+- The module writes YAML files into the sync directory. Include that directory in deployment artifacts or manage it through configuration management pipelines.
+- Cron and Drush batch operations use the same export routines; ensure command line PHP has permission to the sync directory.
+- Log messages are emitted through Drupal’s messenger and logger services. Integrate with your centralized logging stack as required.
 
-Troubleshooting
-- If routing or permissions fail: clear caches `drush cr`.
-- If services fail instantiation: check service class constructor signatures vs services.yml.
-- If you see dynamic property deprecation warnings: inspect classes that assign properties at runtime and add explicit property declarations or refactor.
-
-Recommended checks (run locally)
-- drupal-check (or upgrade_status)
-- Rector (Drupal Rector set)
-- PHPStan with Drupal extensions
-- Functional tests where available
-
-Contact & Maintainers
-- Module created by Mondial-IT for internal use. For questions contact the repo owner.
+## Testing
+- Run static analysis after changes:
+  ```bash
+  php -l $(git ls-files "*.php")
+  ```
+- Where possible, validate exports on a staging environment before promoting to production.

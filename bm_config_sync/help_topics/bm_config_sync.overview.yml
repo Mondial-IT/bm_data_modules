@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - bm_config_sync
+id: bm_config_sync.overview
+label: 'Using Blue Marloc Config Sync'

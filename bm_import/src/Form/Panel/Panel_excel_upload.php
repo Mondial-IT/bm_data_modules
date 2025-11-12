@@ -5,9 +5,9 @@
    Created on 2024-12-16 at 11:46:21
  */
 
-namespace bmDataModules\bm_import\src\Form\Panel;
+namespace Drupal\bm_import\Form\Panel;
 
-use bmDataModules\bm_import\src\BMImport\BMImport;
+use Drupal\bm_import\BMImport\BMImport;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Markup;
@@ -59,7 +59,7 @@ class Panel_excel_upload extends FormBase{
   /**
    * @inheritDoc
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $form_state->setRebuild(true);
   }
 

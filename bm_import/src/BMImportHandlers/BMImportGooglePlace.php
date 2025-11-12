@@ -1,8 +1,8 @@
 <?php
 
-namespace bmDataModules\bm_import\src\BMImportHandlers;
+namespace Drupal\bm_import\BMImportHandlers;
 
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportImagesHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportImagesHandler;
 use Drupal;
 use Drupal\bm_google_places\GooglePlace\GooglePlace;
 use Drupal\bm_import\BMImportHandlers\BMImportCreator;

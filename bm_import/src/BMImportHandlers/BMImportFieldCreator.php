@@ -4,9 +4,9 @@
  */
 /** @noinspection PhpClassHasTooManyDeclaredMembersInspection */
 
-namespace bmDataModules\bm_import\src\BMImportHandlers;
+namespace Drupal\bm_import\BMImportHandlers;
 
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
 use Drupal;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;

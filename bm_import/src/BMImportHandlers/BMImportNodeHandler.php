@@ -1,9 +1,9 @@
 <?php
 
-namespace bmDataModules\bm_import\src\BMImportHandlers;
+namespace Drupal\bm_import\BMImportHandlers;
 
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportParagraphHandler;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportVocabularyHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportParagraphHandler;
+use Drupal\bm_import\BMImportHandlers\BMImportVocabularyHandler;
 use Drupal;
 use Drupal\bm_import\BMImportHandlers\BMImportCreator;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;

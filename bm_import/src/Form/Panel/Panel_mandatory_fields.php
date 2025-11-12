@@ -5,12 +5,12 @@
    Created on 2024-12-16 at 4:44:21
  */
 
-namespace bmDataModules\bm_import\src\Form\Panel;
+namespace Drupal\bm_import\Form\Panel;
 
 use Drupal;
 use Drupal\bm_hierarchical_select\BMHierarchicalSelect\BMHierarchicalSelect;
-use bmDataModules\bm_import\src\BMImport\BMImport;
-use bmDataModules\bm_import\src\BMImportHandlers\BMImportVocabularyHandler;
+use Drupal\bm_import\BMImport\BMImport;
+use Drupal\bm_import\BMImportHandlers\BMImportVocabularyHandler;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -23,7 +23,7 @@ class Panel_mandatory_fields extends FormBase {
   /**
    * @inheritDoc
    */
-  public function getFormId():string {
+  public function getFormId(): string {
     return 'panel_mandatory_fields';
   }
   private BMImport $BMImport;
