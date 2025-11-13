@@ -6,8 +6,8 @@
 # Set the variables before copy-ing it in a directory.
 set -euo pipefail
 
-URL="https://github.com/Mondial-IT/bmDataModules.git"
-DIR="bmDataModules"
+URL="https://github.com/Mondial-IT/bm_data_modules.git"
+DIR="bm_data_modules"
 BRANCH="dev-d9-conversion-to-d11"
 
 # Require we're somewhere under .../git_root/...

@@ -1,0 +1,26 @@
+{
+    "name": "mondial-it/bm_data_modules",
+    "description": "Blue Marloc bm_import, bm_config_sync, bm_xlsx modules.",
+    "type": "drupal-custom-module",
+    "version": "1.0.0",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Blue Marloc",
+            "email": "info@bluemarloc.com"
+        }
+    ],
+    "require": {
+        "drupal/core": "^11"
+    },
+    "autoload": {
+        "psr-4": {
+            "Drupal\\bm_cache\\": "src/"
+        }
+    },
+    "extra": {
+        "drupal": {
+            "package": "Blue Marloc"
+        }
+    }
+}
