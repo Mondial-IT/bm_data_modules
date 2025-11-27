@@ -12,5 +12,10 @@
     ],
     "require": {
         "shuchkin/simplexlsx": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Drupal\\bm_xlsx\\": "src/"
+        }
     }
 }
