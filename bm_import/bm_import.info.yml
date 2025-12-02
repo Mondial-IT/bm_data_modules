@@ -1,6 +1,6 @@
-name: Import Module
+name: Mondial-IT Import Module
 description: Importing complex entity content from spreadsheet files.
-package: Blue Marloc
+package: Mondial-IT
 type: module
 version: "1.0"
 core_version_requirement: 11.x

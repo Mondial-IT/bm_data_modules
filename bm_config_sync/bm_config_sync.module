@@ -1,4 +1,7 @@
 <?php
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
 function bm_config_sync_preprocess_page(array &$variables) {
 
   if (\Drupal::routeMatch()->getRouteName() == 'system.batch_page.html') {
@@ -9,4 +12,79 @@ function bm_config_sync_preprocess_page(array &$variables) {
     $variables['#attached']['library'][] = 'bm_config_sync/bm_config_sync.batch_css';
     $variables['#attached']['library'][] = 'bm_config_sync/bm_config_sync.batch_js';
   }
+}
+
+/**
+ * Implements hook_help().
+ */
+function bm_config_sync_help($route_name, RouteMatchInterface $route_match): string {
+  if ($route_name === 'help.page.bm_config_sync') {
+    $output = '<h2>' . t('Mondial-IT Configurations export and import') . '</h2>';
+    $output .= '<p>' . t('Compare, synchronize, and document Drupal configuration. The module also exposes JSON API routes for ERD data and UUID alignment utilities used during content migrations.') . '</p>';
+
+    $output .= '<h3>' . t('Menus') . '</h3><ul>';
+    $output .= '<li>' . t('<strong>bm_config_sync</strong> — top-level entry under Blue Marloc » Administration that groups every configuration tool.') . '</li>';
+    $output .= '<li>' . t('<strong>Settings</strong> — configure API credentials and feature toggles.') . '</li>';
+    $output .= '<li>' . t('<strong>Combined ERDs</strong> / <strong>Individual ERDs</strong> — launch entity relationship tables for bundles.') . '</li>';
+    $output .= '<li>' . t('<strong>Sync config UUIDs</strong>, <strong>Import/Export</strong>, and <strong>JSON API</strong> — operational links to align UUIDs, run imports, exports, and inspect endpoints.') . '</li>';
+    $output .= '</ul>';
+
+    $output .= '<h3>' . t('URIs') . '</h3><ul>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Module settings form.', [
+      '@uri' => '/admin/config/system/bm_config_sync',
+      '@route' => 'bm_config_sync.settings_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Combined ERD table for a bundle and its children.', [
+      '@uri' => '/bm-admin/bm_config_sync/combined-erd',
+      '@route' => 'bm_config_sync.bm_config_sync_combined_erd_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Individual ERDs per bundle.', [
+      '@uri' => '/bm-admin/bm_config_sync/individual-erds',
+      '@route' => 'bm_config_sync.bm_config_sync_individual_erd_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Align UUIDs with a target environment.', [
+      '@uri' => '/admin/config/system/bm_config_sync_uuid',
+      '@route' => 'bm_config_sync.bm_config_sync_uuid_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Export configuration bundles.', [
+      '@uri' => '/admin/config/system/bm_config_sync_export',
+      '@route' => 'bm_config_sync.bm_config_sync_export_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Import configuration bundles.', [
+      '@uri' => '/admin/config/system/bm_config_sync_import',
+      '@route' => 'bm_config_sync.bm_config_sync_import_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Combined import/export helper.', [
+      '@uri' => '/admin/config/system/bm_config_sync_import_export',
+      '@route' => 'bm_config_sync.bm_config_sync_import_export_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Trigger batch export controller.', [
+      '@uri' => '/admin/config/system/bm_config_sync_batch_exporter',
+      '@route' => 'bm_config_sync.startBMConfigSyncBatchExporter',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — JSON endpoint describing available endpoints.', [
+      '@uri' => '/json-api/config/endpoints',
+      '@route' => 'bm_config_sync.bm_config_sync_jsonapi_endpoints',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — JSON field listing for a bundle.', [
+      '@uri' => '/json-api/config/fields/{bundleName}',
+      '@route' => 'bm_config_sync.bm_config_sync_jsonapi_field_list',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — JSON combined ERD table.', [
+      '@uri' => '/json-api/config/combined-erd/{bundleName}',
+      '@route' => 'bm_config_sync.bm_config_sync_jsonapi_combined_erd',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — JSON combined field paths.', [
+      '@uri' => '/json-api/config/combined-field-paths/{bundleName}',
+      '@route' => 'bm_config_sync.bm_config_sync_jsonapi_combined_field_paths',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — JSON bundle list.', [
+      '@uri' => '/json-api/config/bundles',
+      '@route' => 'bm_config_sync.bm_config_sync_jsonapi_bundle_list',
+    ]) . '</li>';
+    $output .= '</ul>';
+
+    return $output;
+  }
+  return '';
 }

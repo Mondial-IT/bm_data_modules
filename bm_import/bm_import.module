@@ -5,20 +5,45 @@ use Drupal\Core\Entity\Entity\EntityFormDisplay;
 
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
 //
 //function bm_import_page_attachments(array &$page): void {
 //  $page['#attached']['library'][] = 'bm_import/bm_import';
 //}
 
-function bm_import_help($route_name, RouteMatchInterface $route_match): string|TranslatableMarkup {
-  return match ($route_name) {
-    'help.page.bm_import' => t('
-                <h2>Help for importing listing content.</h2>
-                <h3>Available in BMimport::</h3>'),
-    default => '',
-  };
+function bm_import_help($route_name, RouteMatchInterface $route_match): string {
+  if ($route_name === 'help.page.bm_import') {
+    $output = '<h2>' . t('Mondial-IT Import Module') . '</h2>';
+    $output .= '<p>' . t('Imports complex entity content from spreadsheet files, provides management UIs for batch definitions, and ships test tooling for handlers.') . '</p>';
 
+    $output .= '<h3>' . t('Menus') . '</h3><ul>';
+    $output .= '<li>' . t('<strong>bm_import</strong> — top-level entry under Blue Marloc » Data production that exposes every import form.') . '</li>';
+    $output .= '<li>' . t('<strong>Settings</strong> — configure default sheet mappings and file handling.') . '</li>';
+    $output .= '<li>' . t('<strong>Import Management</strong> — manage defined imports and execution batches.') . '</li>';
+    $output .= '<li>' . t('<strong>Tests</strong> / <strong>Paragraph handler</strong> — developer tools for validating handlers and preflight checks.') . '</li>';
+    $output .= '</ul>';
+
+    $output .= '<h3>' . t('URIs') . '</h3><ul>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Module settings.', [
+      '@uri' => '/admin/config/system/bm-import',
+      '@route' => 'bm_import.settings_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Import management dashboard.', [
+      '@uri' => '/admin/config/system/bm-import-management',
+      '@route' => 'bm_import.bm_importmanagement_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Preflight checks / test harness.', [
+      '@uri' => '/admin/config/system/bm-import-preflight',
+      '@route' => 'bm_import.bm_import_panel_preflight_checks_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Paragraph handler test form.', [
+      '@uri' => '/admin/config/system/bm-import-test/paragraph-handler',
+      '@route' => 'bm_import.paragraph_handler_test_form',
+    ]) . '</li>';
+    $output .= '</ul>';
+
+    return $output;
+  }
+  return '';
 }
 
 /**

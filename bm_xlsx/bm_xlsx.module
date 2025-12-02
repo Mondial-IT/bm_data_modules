@@ -1,32 +1,39 @@
 <?php
 
+use Drupal\Core\Routing\RouteMatchInterface;
+
 /*
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
    Created on 2024-11-21 at 11:32:11
  */
-function bm_xlsx_help($route_name, $route_match): string {
+function bm_xlsx_help($route_name, RouteMatchInterface $route_match): string {
   if ($route_name == 'help.page.bm_xlsx') {
-    return
-      '<p>Blue Marloc Excel interface</p>
-    <p>
-      <h3>class BMXLSX</h3>
-      <ul>
-      <li>__construct([file_path_or_fid: int|string = 0])</li>
-      <li>getFileUri(): null|string</li>
-      <li>getXLSX(): array|null|SimpleXLSX</li>
-      <li>getRowsKeyed([workSheetIndex = null], [limit = null]): array|null</li>
-      <li>getRows([workSheetIndex = null], [limit = null]): array|null</li>
-      <li>getRowHeader([workSheetIndex = null]): array|null</li>
-      <li>getRowsWithoutHeader([workSheetIndex = null], [limit = null]): array|null</li>
-      <li>getSheetNames(): array|null</li>
-      <li>getColors(sheet, [rowStart: int|null = null], [rowEnd: int|null = null], [columnIndex: int|null = null]): array|null</li>
-      <li>cache_config_sheet_selection_and_limit(sheet: string, limit): void</li>
-      <li>get_config_sheet_selection_and_limit(): stdClass</li>
-      <li>get_current_sheet(): int|null</li>
-      <li>get_current_limit(): int|null</li>
-      <li>save_as_excel(data: array, uri: string): string</li>
-      </ul>
-      </p>';
+    $output = '<h2>' . t('Mondial-IT Excel Module') . '</h2>';
+    $output .= '<p>' . t('Provides spreadsheet upload helpers, sheet previews, and utility services (BMXLSX) that normalize Excel data for other Blue Marloc modules.') . '</p>';
+
+    $output .= '<h3>' . t('Menus') . '</h3><ul>';
+    $output .= '<li>' . t('<strong>bm_xlsx</strong> — link under Blue Marloc » Data production that leads to the settings and demo forms.') . '</li>';
+    $output .= '<li>' . t('<strong>Boilerplate</strong> / <strong>Upload and sheet select</strong> — nested demo links for the uploader form.') . '</li>';
+    $output .= '</ul>';
+
+    $output .= '<h3>' . t('URIs') . '</h3><ul>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Configure upload defaults.', [
+      '@uri' => '/admin/config/system/bm-xlsx/settings',
+      '@route' => 'bm_xlsx.settings_form',
+    ]) . '</li>';
+    $output .= '<li>' . t('<code>@uri</code> (<code>@route</code>) — Standalone upload + sheet selection form used inside other flows.', [
+      '@uri' => '/bm-xlsx/xlsx-upload-and-sheet-select-form',
+      '@route' => 'bm_xlsx.excel_upload_and_sheet_select_form',
+    ]) . '</li>';
+    $output .= '</ul>';
+
+    $output .= '<h3>' . t('BMXLSX helper highlights') . '</h3><ul>';
+    $output .= '<li>' . t('<code>getRows()</code> / <code>getRowsKeyed()</code> — Fetch worksheet rows as indexed or keyed arrays.') . '</li>';
+    $output .= '<li>' . t('<code>getSheetNames()</code> — Enumerate available worksheets for UI selection.') . '</li>';
+    $output .= '<li>' . t('<code>save_as_excel()</code> — Write processed data back to an XLSX file.') . '</li>';
+    $output .= '</ul>';
+
+    return $output;
   }
   return "";
 }

@@ -1,5 +1,5 @@
-name: Excel Module
+name: Mondial-IT Excel Module
 type: module
 description: 'Provides Spreadsheet functionalities'
-package: Blue Marloc
+package: Mondial-IT
 core_version_requirement: ^11

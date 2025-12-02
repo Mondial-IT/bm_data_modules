@@ -1,7 +1,7 @@
-name: 'Configurations export and import Module'
+name: 'Mondial-IT Configurations export and import Module'
 type: module
 description: 'A module to compare and synchronize configurations and display ERD.'
 core_version_requirement: 11.x
-package: Blue Marloc
+package: Mondial-IT
 dependencies:
   - drupal:config
