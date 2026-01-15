@@ -1,7 +1,7 @@
 bm_config_sync.settings_form:
   path: '/admin/config/system/bm_config_sync'
   defaults:
-    _title: 'BlueMarloc Configuration Synchronization Settings'
+    _title: 'ConfigSync - Configuration Synchronization Settings'
     _form: 'Drupal\bm_config_sync\Form\SettingsForm'
   requirements:
     _permission: 'administer bm_config_sync configuration'
@@ -9,35 +9,38 @@ bm_config_sync.settings_form:
 # A table with the combined entity relation diagram of a bundle
 # consisting of the bundle and its children paragraphs, taxonomies
 bm_config_sync.bm_config_sync_combined_erd_form:
-  path: '/bm-admin/bm_config_sync/combined-erd'
+  path: '/admin/bm_config_sync/combined-erd-form'
   defaults:
-    _title: 'Combined Entity Relation Diagram table'
+    _title: 'ERD - Combined Entity Relation Diagram table'
     _form: 'Drupal\bm_config_sync\Form\BMConfigSyncCombinedERDForm'
+  requirements:
+    _permission: 'administer bm_config_sync configuration'
+#
+bm_config_sync.bm_config_sync_erd_builder_form:
+  path: '/admin/bm_config_sync/erd-builder-form'
+  defaults:
+    _title: 'BMConfigSyncERDBuilderForm'
+    _form: 'Drupal\bm_config_sync\Form\BMConfigSyncERDBuilderForm'
   requirements:
     _permission: 'administer bm_config_sync configuration'
 #
 # A table with the entity relation diagram per bundle
 bm_config_sync.bm_config_sync_individual_erd_form:
-  path: '/bm-admin/bm_config_sync/individual-erds'
+  path: '/admin/bm_config_sync/individual-erds'
   defaults:
-    _title: 'Individual Entity Relation Diagram tables'
+    _title: 'ERD - Individual Entity Relation Diagram tables'
     _form: 'Drupal\bm_config_sync\Form\BMConfigSyncIndividualERDForm'
   requirements:
     _permission: 'administer bm_config_sync configuration'
 
 
-bm_config_sync.bm_config_sync_uuid_form:
-  path: '/admin/config/system/bm_config_sync_uuid'
-  defaults:
-    _title: 'bm_config_sync_uuid form'
-    _form: 'Drupal\bm_config_sync\Form\ConfigSyncUUIDForm'
-  requirements:
-    _permission: 'administer bm_config_sync configuration'
+
+# import Export
 
 bm_config_sync.bm_config_sync_export_form:
   path: '/admin/config/system/bm_config_sync_export'
   defaults:
-    _title: 'bm_config_sync_export form'
+    _title: 'Export Configurations'
     _form: 'Drupal\bm_config_sync\Form\BMConfigSyncExportForm'
   requirements:
     _permission: 'administer bm_config_sync configuration'
@@ -45,16 +48,16 @@ bm_config_sync.bm_config_sync_export_form:
 bm_config_sync.bm_config_sync_import_form:
   path: '/admin/config/system/bm_config_sync_import'
   defaults:
-    _title: 'bm_config_sync_import form'
-    _form: 'Drupal\bm_config_sync\Form\ConfigSyncImportForm'
+    _title: 'Import Configurations'
+    _form: 'Drupal\bm_config_sync\Form\BMConfigSyncImportForm'
   requirements:
     _permission: 'administer bm_config_sync configuration'
 
 bm_config_sync.bm_config_sync_import_export_form:
   path: '/admin/config/system/bm_config_sync_import_export'
   defaults:
-    _title: 'bm_config_sync_import_export form'
-    _form: 'Drupal\bm_config_sync\Form\ConfigSyncImportExportForm'
+    _title: 'Configurations Import Export'
+    _form: 'Drupal\bm_config_sync\Form\BMConfigSyncImportExportForm'
   requirements:
     _permission: 'administer bm_config_sync configuration'
 
@@ -68,6 +71,13 @@ bm_config_sync.startBMConfigSyncBatchExporter:
 #
 #
 #
+bm_config_sync.bm_config_sync_uuid_form:
+  path: '/admin/config/system/bm_config_sync_uuid'
+  defaults:
+    _title: 'UUID bm_config_sync_uuid form'
+    _form: 'Drupal\bm_config_sync\Form\ConfigSyncUUIDForm'
+  requirements:
+    _permission: 'administer bm_config_sync configuration'
 #
 #
 

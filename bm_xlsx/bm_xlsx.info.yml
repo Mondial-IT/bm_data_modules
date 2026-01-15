@@ -1,5 +1,8 @@
-name: Excel Module
+name: BM Excel Module
 type: module
 description: 'Provides Spreadsheet functionalities'
 package: Blue Marloc
 core_version_requirement: ^11
+dependencies:
+  - drupal:file
+  - bm_main

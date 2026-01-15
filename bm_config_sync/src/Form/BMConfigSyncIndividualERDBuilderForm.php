@@ -8,22 +8,17 @@ namespace Drupal\bm_config_sync\Form;
 
 
 use Drupal;
-use Drupal\bm_config_sync\Controller\BMConfigSyncController;
 use Drupal\bm_config_sync\Handler\BMConfigSyncHandler;
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\Ajax\InvokeCommand;
-use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Config\ConfigImporter;
-use Drupal\Core\Config\FileStorage;
-use Drupal\Core\Config\StorageComparer;
-use Drupal\Core\File\FileSystem;
-use Drupal\Core\Form\FormBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Config\Config;
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Markup;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class BMTemplateForm for a Drupal settings form with AJAX table select functionality.
@@ -96,16 +91,19 @@ class BMConfigSyncIndividualERDBuilderForm extends FormBase {
 
   public array $ERD;
 
-  public mixed $config;
+  public Config $config;
 
   public string $exportedYML;
 
-  public BMConfigSyncHandler $configSyncHandler;
+  protected BMConfigSyncHandler $configSyncHandler;
 
   public array $form;// keep base of form available in panels
 
-  public function __construct() {
-
+  public static function create(ContainerInterface $container): self {
+    /** @var self $instance */
+    $instance = parent::create($container);
+    $instance->configSyncHandler = $container->get('bm_config_sync.handler');
+    return $instance;
   }
 
   /**
@@ -126,8 +124,6 @@ class BMConfigSyncIndividualERDBuilderForm extends FormBase {
     $this->ERD = [];
     $this->exportedYML = '';
     $this->config = \Drupal::configFactory()->getEditable('bm_config_sync.settings');
-    $this->configSyncHandler = new BMConfigSyncHandler();
-
     // called , build, then ajax on sumit
     // on onChange it is not called.
     $input = $form_state->getValue('input');
@@ -138,50 +134,17 @@ class BMConfigSyncIndividualERDBuilderForm extends FormBase {
    * Builds the settings form.
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    // Attach the bm_tippy tooltip library to the form.
-    $form['#attached']['library'][] = 'ziston/tippyjs';
-    $form['#attached']['library'][] = 'ziston/bm_tippyjs';
+    $form['#attached']['library'][] = 'bm_tooltip/tooltip';
     $form['#attached']['library'][] = 'bm_main/datatablesjs';
+    $form['#attached']['library'][] = 'bm_config_sync/admin_styles';
+    $form['#attributes']['class'][] = 'bm-config-sync-form';
 
 
     $this->panel_select($form, $form_state, 'panel1');
 
     $form['panels'] = [
-      '#prefix' => '<div id=' . self::ID_ERD_PANELS . ' class="grid-fr-fr-fr gap-20">',
+      '#prefix' => '<div id=' . self::ID_ERD_PANELS . ' class="grid-fr-fr-fr gap-20 bm-config-sync-grid">',
       '#suffix' => '</div>',
-    ];
-    // Inject CSS styles directly into the page.
-    $form['custom_styles'] = [
-      '#type' => 'markup',
-      '#markup' => Markup::create('<style>
-         #id-selector-panel{
-
-         }
-         #id-erd-panels{
-            margin-top: 30px;
-         }
-         .panel{
-            max-width:580px;
-            }
-         .panel td,.panel th{
-            white-space: nowrap;
-            }
-        .ajax-response {
-            color: green;font-family:"monospace"; max-height:300px;overflow:auto;
-            }
-        .table-select-panel {
-            margin: 10px; border: 1px solid #ccc; padding: 15px;
-            }
-        .table-select-panel {
-            max-height:500px;overflow-y:auto;
-            }
-        .button-container button {
-            margin-right: 5px;
-            }
-        hr{
-            clear:both;
-            }
-      </style>'),
     ];
     // entity selector
 

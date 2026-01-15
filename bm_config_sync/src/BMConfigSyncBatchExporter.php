@@ -7,298 +7,105 @@
 
 namespace Drupal\bm_config_sync;
 
-
 use Drupal;
 use Drupal\Core\Config\FileStorage;
-use Drupal\Core\Config\StorageComparer;
 use Drupal\Core\Config\StorageInterface;
-use Drupal\Core\File\FileSystem;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\Serialization\Yaml;
-use Drupal\facets\Exception\Exception;
+use Drupal\Core\Site\Settings;
 
 /**
- * Class ConfigurationExporter
- *
- * Handles exporting of configuration entities such as nodes, fields, paragraphs, and taxonomies in batches.
+ * Handles exporting Drupal configuration entities via the batch API.
  */
 class BMConfigSyncBatchExporter {
 
-  /**
-   * @var StorageInterface
-   */
-  protected $activeStorage;
+  protected StorageInterface $activeStorage;
 
-  /**
-   * @var \Drupal\Core\Config\FileStorage
-   */
-  protected $syncStorage;
+  protected FileStorage $syncStorage;
 
-  /**
-   * @var \Drupal\Core\Config\StorageComparer
-   */
-  protected $storageComparer;
-
-  /**
-   * @var MessengerInterface
-   */
-  protected $messenger;
-
-  /**
-   * Constructor.
-   *
-   */
   public function __construct() {
-
   }
 
   /**
-   * Exports configurations related to nodes, fields, paragraphs, and taxonomies.
-   *
-   * Create a list of batch operations to perform
-   *
-   * @throws \Exception
+   * Prepares a batch definition for exporting curated configuration.
    */
   public function batchPrepare(): array {
     try {
-      // Get the config factory service to access configuration storage
-      $config_factory = \Drupal::configFactory();  // Get the config factory service
-
-      // Get editable configuration storage (for reading or writing)
-      $this->activeStorage = \Drupal::service('config.storage');  // Use the config storage service
-
-      // Get the sync directory path.
-      $file_system = \Drupal::service('file_system');
-      $syncDirectory = 'private://config_sync/';
-
-      // Ensure the sync directory exists and is writable
-      $this->ensureSyncDirectoryExistsAndWriteFile($syncDirectory);
-
-      // Clear the sync directory before exporting configurations.
+      $this->activeStorage = \Drupal::service('config.storage');
+      $configStorage = \Drupal::service('config.storage');
+      $syncDirectory = $this->ensureSyncDirectoryExists();
       $this->clearSyncDirectory($syncDirectory);
-
-      // Create a FileStorage instance for the sync directory.
       $this->syncStorage = new FileStorage($syncDirectory);
 
-      // Define the batch
       $batch = [
         'title' => t('Exporting configurations...'),
         'operations' => [],
-        'finished' => '\Drupal\bm_config_sync\BMConfigSyncBatchExporter::exportBatchFinished',
-        // Finish callback
+        'finished' => '\\Drupal\\bm_config_sync\\BMConfigSyncBatchExporter::exportBatchFinished',
       ];
 
-      // Initialize total count for operations
-      $total_operations = 0;
-
-      // List all the configuration names that are registered in Drupal
-      $configStorage =\Drupal::service('config.storage');
-      $config_names = $configStorage->listAll(); // Get all configuration names
-
-      // Add operations to the batch for relevant configurations
-      foreach ($config_names as $name) {
-        // Read each configuration data
+      $configNames = $configStorage->listAll();
+      foreach ($configNames as $name) {
+        if (!$this->isTrackedConfig($name)) {
+          continue;
+        }
         $data = $configStorage->read($name);
-
-        // Only include configurations related to nodes, paragraphs, taxonomies, and fields
-
-        if (
-          !str_starts_with($name, 'views.view.') &&
-          !str_starts_with($name, 'node.type.') &&
-          !str_starts_with($name, 'taxonomy.vocabulary.') &&
-          !str_starts_with($name, 'paragraphs.paragraph_type.') &&
-
-          !str_starts_with($name, 'field.storage.') &&
-          !str_starts_with($name, 'field.field.node') &&
-          !str_starts_with($name, 'field.field.paragraph') &&
-          !str_starts_with($name, 'field.field.taxonomy_term') &&
-
-          !str_starts_with($name, 'core.base_field_override.node.') &&
-          !str_starts_with($name, 'core.base_field_override.paragraph.') &&
-          !str_starts_with($name, 'core.base_field_override.taxonomy_term.') &&
-
-          !str_starts_with($name, 'core.entity_form_display.node') &&
-          !str_starts_with($name, 'core.entity_form_display.paragraph') &&
-          !str_starts_with($name, 'core.entity_form_display.taxonomy_term') &&
-
-          !str_starts_with($name, 'core.entity_view_display.node') &&
-          !str_starts_with($name, 'core.entity_view_display.paragraph') &&
-          !str_starts_with($name, 'core.entity_view_display.taxonomy_term') &&
-
-          !str_starts_with($name, 'core.entity_view_mode.node') &&
-          !str_starts_with($name, 'core.entity_view_mode.paragraph') &&
-          !str_starts_with($name, 'core.entity_view_mode.taxonomy_term') &&
-
-          !str_starts_with($name, 'language.content_settings.node') &&
-          !str_starts_with($name, 'language.content_settings.paragraph') &&
-          !str_starts_with($name, 'language.content_settings.taxonomy_term')
-        ) continue;
-
-          $batch['operations'][] = [
-            '\Drupal\bm_config_sync\BMConfigSyncBatchExporter::batchOperationCallback',
-            [$name, $data, $this->syncStorage]
-          ];
-
-          $total_operations++;
-
+        $batch['operations'][] = [
+          '\\Drupal\\bm_config_sync\\BMConfigSyncBatchExporter::batchOperationCallback',
+          [$name, $data, $this->syncStorage],
+        ];
       }
 
-      // Get all  data from the remaining collections.
       foreach ($configStorage->getAllCollectionNames() as $collection) {
-
-
-
-        // Add operations to the batch for relevant configurations
         foreach ($configStorage->listAll($collection) as $name) {
-
-          if(in_array($name, $config_names))continue;
-
-          // Read each configuration data
+          if (in_array($name, $configNames, TRUE)) {
+            continue;
+          }
+          if (!$this->isTrackedConfig($name)) {
+            continue;
+          }
           $data = $configStorage->read($name);
-
-          // Only include configurations related to nodes, paragraphs, taxonomies, and fields
-          if (
-            !str_starts_with($name, 'views.view.') &&
-            !str_starts_with($name, 'node.type.') &&
-            !str_starts_with($name, 'taxonomy.vocabulary.') &&
-            !str_starts_with($name, 'paragraphs.paragraph_type.') &&
-
-            !str_starts_with($name, 'field.storage.') &&
-            !str_starts_with($name, 'field.field.node') &&
-            !str_starts_with($name, 'field.field.paragraph') &&
-            !str_starts_with($name, 'field.field.taxonomy_term') &&
-
-            !str_starts_with($name, 'core.base_field_override.node.') &&
-            !str_starts_with($name, 'core.base_field_override.paragraph.') &&
-            !str_starts_with($name, 'core.base_field_override.taxonomy_term.') &&
-
-            !str_starts_with($name, 'core.entity_form_display.node') &&
-            !str_starts_with($name, 'core.entity_form_display.paragraph') &&
-            !str_starts_with($name, 'core.entity_form_display.taxonomy_term') &&
-
-            !str_starts_with($name, 'core.entity_view_display.node') &&
-            !str_starts_with($name, 'core.entity_view_display.paragraph') &&
-            !str_starts_with($name, 'core.entity_view_display.taxonomy_term') &&
-
-            !str_starts_with($name, 'core.entity_view_mode.node') &&
-            !str_starts_with($name, 'core.entity_view_mode.paragraph') &&
-            !str_starts_with($name, 'core.entity_view_mode.taxonomy_term') &&
-
-            !str_starts_with($name, 'language.content_settings.node') &&
-            !str_starts_with($name, 'language.content_settings.paragraph') &&
-            !str_starts_with($name, 'language.content_settings.taxonomy_term')
-          ) continue;
-
           $batch['operations'][] = [
-            '\Drupal\bm_config_sync\BMConfigSyncBatchExporter::batchOperationCallback',
-            [$name, $data, $this->syncStorage]
+            '\\Drupal\\bm_config_sync\\BMConfigSyncBatchExporter::batchOperationCallback',
+            [$name, $data, $this->syncStorage],
           ];
-
-          $total_operations++;
-
         }
       }
 
-
-      // Store the total number of operations to calculate progress
-      $batch['total_operations'] = $total_operations;
-
-      // Execute the batch process
       return $batch;
-    } catch (Exception $e) {
-      // Handle any errors and log them
+    }
+    catch (\Exception $e) {
       Drupal::messenger()->addError($e->getMessage());
       return [];
     }
   }
 
-
-  /**
-   * Function to ensure the private sync directory exists and is writable.
-   */
-  function ensureSyncDirectoryExistsAndWriteFile(): array|string {
-    // Get the file system service
-    $file_system = \Drupal::service('file_system');
-
-    // Get the private file system path using realpath()
-    $private_path = \Drupal::service('file_system')->realpath('private://');
-
-    // Define the path for the sync directory
-    $syncDirectory = $private_path . '/config_sync';
-
-    // Check if the sync directory exists, if not, create it
-    if (!is_dir($syncDirectory)) {
-      try {
-        // Create the directory with the recursive flag (TRUE ensures parent directories are created if missing)
-        $file_system->mkdir($syncDirectory, 0775, TRUE); // 0775 sets the permissions
-        \Drupal::messenger()
-          ->addMessage(t('The directory @directory has been created.', ['@directory' => $syncDirectory]));
-      } catch (\Exception $e) {
-        \Drupal::messenger()
-          ->addError(t('Failed to create the directory @directory: @message', [
-            '@directory' => $syncDirectory,
-            '@message' => $e->getMessage(),
-          ]));
-        throw new \Exception('Failed to create the sync directory: ' . $e->getMessage());
-      }
+  protected function ensureSyncDirectoryExists(): string {
+    $configured = Settings::get('config_sync_directory');
+    if (!$configured) {
+      throw new \RuntimeException('The config_sync_directory setting is not defined.');
     }
-
-    // Ensure the sync directory exists and is writable
-    if (!is_writable($syncDirectory)) {
-      \Drupal::messenger()->addError("The sync directory is not writable: $syncDirectory");
-      return [];
+    $fileSystem = \Drupal::service('file_system');
+    $fileSystem->prepareDirectory($configured, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
+    $realPath = $fileSystem->realpath($configured);
+    if (!$realPath) {
+      throw new \RuntimeException(sprintf('Unable to resolve config sync directory path: %s', $configured));
     }
-
-    // Example of writing a file in the private sync directory
-    try {
-      $file_name = 'example.txt';
-      $file_path = $syncDirectory . '/' . $file_name;
-
-      // Content to write to the file
-      $content = 'This is a test file for configuration sync.';
-
-      // Write content to the file
-      $file_system->saveData($content, $file_path, FileSystemInterface::EXISTS_REPLACE);
-
-      \Drupal::messenger()->addMessage(t('File written successfully to @path', ['@path' => $file_path]));
-    } catch (\Exception $e) {
-      \Drupal::messenger()->addError(t('Failed to write file to @path: @message', [
-        '@path' => $syncDirectory,
-        '@message' => $e->getMessage(),
-      ]));
-      throw new \Exception('Failed to write file to sync directory: ' . $e->getMessage());
+    if (!is_writable($realPath)) {
+      throw new \RuntimeException(sprintf('The config sync directory is not writable: %s', $realPath));
     }
-
-    return $syncDirectory;
+    return $realPath;
   }
 
-
-  /**
-   * Clears the sync directory by deleting all configuration files.
-   *
-   * @param string $syncDirectory
-   *
-   * @throws \Exception
-   */
-  protected function clearSyncDirectory($syncDirectory): void {
-    // Ensure that the directory exists
+  protected function clearSyncDirectory(string $syncDirectory): void {
     if (!is_dir($syncDirectory)) {
-      throw new \Exception("The sync directory does not exist: $syncDirectory");
+      throw new \RuntimeException("The sync directory does not exist: $syncDirectory");
     }
 
-    // Open the directory and get all files/subdirectories.
     $files = array_diff(scandir($syncDirectory), ['.', '..']);
-
-    // Loop through each file or subdirectory and delete it.
     foreach ($files as $file) {
       $filePath = $syncDirectory . DIRECTORY_SEPARATOR . $file;
-
-      // If it's a file, delete it
       if (is_file($filePath)) {
         unlink($filePath);
       }
-      // If it's a directory, recursively delete its contents
       elseif (is_dir($filePath)) {
         $this->deleteDirectoryRecursive($filePath);
       }
@@ -307,9 +114,8 @@ class BMConfigSyncBatchExporter {
     Drupal::messenger()->addMessage('Sync directory cleared: ' . $syncDirectory);
   }
 
-  protected function deleteDirectoryRecursive($directory): void {
+  protected function deleteDirectoryRecursive(string $directory): void {
     $files = array_diff(scandir($directory), ['.', '..']);
-
     foreach ($files as $file) {
       $filePath = $directory . DIRECTORY_SEPARATOR . $file;
       if (is_file($filePath)) {
@@ -319,38 +125,56 @@ class BMConfigSyncBatchExporter {
         $this->deleteDirectoryRecursive($filePath);
       }
     }
-
     rmdir($directory);
+  }
+
+  protected function isTrackedConfig(string $name): bool {
+    $prefixes = [
+      'views.view.',
+      'node.type.',
+      'taxonomy.vocabulary.',
+      'paragraphs.paragraph_type.',
+      'field.storage.',
+      'field.field.node',
+      'field.field.paragraph',
+      'field.field.taxonomy_term',
+      'core.base_field_override.node.',
+      'core.base_field_override.paragraph.',
+      'core.base_field_override.taxonomy_term.',
+      'core.entity_form_display.node',
+      'core.entity_form_display.paragraph',
+      'core.entity_form_display.taxonomy_term',
+      'core.entity_view_display.node',
+      'core.entity_view_display.paragraph',
+      'core.entity_view_display.taxonomy_term',
+      'core.entity_view_mode.node',
+      'core.entity_view_mode.paragraph',
+      'core.entity_view_mode.taxonomy_term',
+      'language.content_settings.node',
+      'language.content_settings.paragraph',
+      'language.content_settings.taxonomy_term',
+    ];
+    foreach ($prefixes as $prefix) {
+      if (str_starts_with($name, $prefix)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
   public static function batchOperationCallback($name, $data, FileStorage $syncStorage, array &$context): void {
     try {
-     $context['batch_total_operations']=1200;
-      // Update the batch progress based on the total number of operations
-      $context['finished'] += (1 / $context['batch_total_operations']); // Dynamically calculate progress
-
-      // Optionally update results
-      $context['results'][] = 'Exported configuration: ' . $name;
-
       $syncStorage->write($name, $data);
       $context['results'][] = t('Exported configuration: @name', ['@name' => $name]);
-      Drupal::logger(__FUNCTION__)->debug('SUCCESS processed: '.$name);
-
-    } catch (\Exception $e) {
+      Drupal::logger('bm_config_sync')->debug('Exported configuration: @name', ['@name' => $name]);
+    }
+    catch (\Exception $e) {
       $context['results'][] = t('Failed to export configuration: @name', ['@name' => $name]);
-      Drupal::logger(__FUNCTION__)->debug('ERR processed: '.$name);
+      Drupal::logger('bm_config_sync')->error('Failed to export configuration: @name. @error', ['@name' => $name, '@error' => $e->getMessage()]);
     }
   }
 
-
-  /**
-   * Callback function to execute after the batch process is finished.
-   *
-   * @param bool $success
-   * @param array $results
-   * @param array $operations
-   */
-  public static function exportBatchFinished($success, $results, $operations) {
+  public static function exportBatchFinished($success, $results, $operations): void {
     if ($success) {
       Drupal::messenger()->addMessage(t('Configuration export completed successfully.'));
     }
@@ -358,11 +182,9 @@ class BMConfigSyncBatchExporter {
       Drupal::messenger()->addError(t('Configuration export failed.'));
     }
 
-    // Provide feedback on the batch process results
     foreach ($results as $result) {
       Drupal::messenger()->addMessage($result);
     }
   }
-
 
 }

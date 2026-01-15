@@ -11,7 +11,7 @@ namespace Drupal\bm_xlsx;
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
  */
 
-use Drupal\facets\Exception\Exception;
+use Exception;
 use Shuchkin\SimpleXLSX;
 
 /**
@@ -126,14 +126,12 @@ class BMXLSX {
   /**
    * @throws Exception
    */
-  public function getSheetNames($file_path): ?array {
-      if ($this->xlsx) {
-        return $this->xlsx->sheetNames();
-      }
-      else {
-        throw new Exception('.xlsx file not found ' . $file_path);
-      }
+  public function getSheetNames(): ?array {
+    if ($this->xlsx) {
+      return $this->xlsx->sheetNames();
+    }
 
+    throw new Exception('.xlsx file not found or not parsable.');
   }
 
 }

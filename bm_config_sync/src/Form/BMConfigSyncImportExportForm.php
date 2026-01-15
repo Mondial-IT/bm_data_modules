@@ -42,18 +42,9 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
     $form = parent::buildForm($form, $form_state);
 
     // Attach the bm_tippy library to the form.
-    $form['#attached']['library'][] = 'ziston/tippyjs';
-    $form['#attached']['library'][] = 'ziston/bm_tippyjs';
-
-    // Inject CSS styles directly into the page.
-    $form['custom_styles'] = [
-      '#type' => 'markup',
-      '#markup' => Markup::create('<style>
-        .ajax-response { font-weight: bold; color: green; }
-        .table-select-panel { margin: 10px; border: 1px solid #ccc; padding: 15px; }
-        .button-container button { margin-right: 5px; }
-      </style>'),
-    ];
+    $form['#attached']['library'][] = 'bm_tooltip/tooltip';
+    $form['#attached']['library'][] = 'bm_config_sync/admin_styles';
+    $form['#attributes']['class'][] = 'bm-config-sync-form';
 
     // Detect the button clicked and call the action function.
     if ($form_state->getTriggeringElement()) {
@@ -67,7 +58,7 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
     ];
 
     // Panel with table select and buttons.
-    $form['panels']['#prefix']=Markup::create('<div style="display: grid;grid-template-columns: repeat(3, 1fr);gap: 10px;">');
+    $form['panels']['#prefix']=Markup::create('<div class="bm-config-sync-panel-grid">');
     $this->panel_table_contenttypes($form['panels'], $form_state);
     $this->panel_table_taxonomies($form['panels'], $form_state);
     $this->panel_table_vocabularies($form['panels'], $form_state);
@@ -77,7 +68,7 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
   }
 
   private function panel_table_contenttypes(array &$form, FormStateInterface $form_state): void {
-    $form['table_select_panel1']['#prefix'] = '<div class="panel"><h2>Export content type configurations</h2><hr>';
+    $form['table_select_panel1']['#prefix'] = '<div class="bm-config-sync-panel"><h2>Export content type configurations</h2><hr>';
     $form['table_select_panel1']['#suffix'] = '</div>';
 
     $panel = [
@@ -111,7 +102,7 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
     // Response div for displaying processed rows.
     $form['table_select_panel1']['response'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-response', 'class' => ['ajax-response']],
+      '#attributes' => ['id' => 'ajax-response', 'class' => ['bm-config-sync-ajax-response']],
     ];
 
     // Separate AJAX buttons.
@@ -149,7 +140,7 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
   }
 
   private function panel_table_taxonomies(array &$form, FormStateInterface $form_state): void {
-    $form['table_select_panel2']['#prefix'] = '<div class="panel"><h2>PANEL TITLE</h2><hr>';
+    $form['table_select_panel2']['#prefix'] = '<div class="bm-config-sync-panel"><h2>PANEL TITLE</h2><hr>';
     $form['table_select_panel2']['#suffix'] = '</div>';
 
     $panel = [
@@ -178,7 +169,7 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
     // Response div for displaying processed rows.
     $form['table_select_panel2']['response'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-response', 'class' => ['ajax-response']],
+      '#attributes' => ['id' => 'ajax-response', 'class' => ['bm-config-sync-ajax-response']],
     ];
 
     // Separate AJAX buttons.
@@ -216,7 +207,7 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
   }
 
   private function panel_table_vocabularies(array &$form, FormStateInterface $form_state): void {
-    $form['table_select_panel3']['#prefix'] = '<div class="panel"><h2>PANEL TITLE</h2><hr>';
+    $form['table_select_panel3']['#prefix'] = '<div class="bm-config-sync-panel"><h2>PANEL TITLE</h2><hr>';
     $form['table_select_panel3']['#suffix'] = '</div>';
 
     $panel = [
@@ -245,7 +236,7 @@ class BMConfigSyncImportExportForm extends ConfigFormBase {
     // Response div for displaying processed rows.
     $form['table_select_panel3']['response'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-response', 'class' => ['ajax-response']],
+      '#attributes' => ['id' => 'ajax-response', 'class' => ['bm-config-sync-ajax-response']],
     ];
 
     // Separate AJAX buttons.

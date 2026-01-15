@@ -445,13 +445,11 @@ class BMConfigSyncHandler {
    * @return void
    */
   public function populate_combinedERD_ERD_per_bundle($items, $depth=0, $field_path=''): void {
-//    bm_d('', $items, 'items', 'dsm');
-    if($depth>10){
-      bm_d('','', 'at '.$field_path.'  depth > 10 loop warning?', 'dsm');
-
+    if ($depth > 10) {
+      Drupal::logger('bm_config_sync')->warning('ERD depth exceeded 10 while traversing @path.', ['@path' => $field_path]);
     }
-    if($depth>20){
-      bm_d('','', 'at '.$field_path.'  depth > 20 loop error?', 'dsm');
+    if ($depth > 20) {
+      Drupal::logger('bm_config_sync')->error('ERD depth exceeded 20 while traversing @path; aborting recursion.', ['@path' => $field_path]);
       return;
     }
 
@@ -529,9 +527,7 @@ class BMConfigSyncHandler {
           foreach($paragraphs as $paragraph){
             $this->combinedERD[$data['machineName']]['children'] .=' '. $paragraph;
             $this->ERD[$data['bundle']][$data['machineName']]['children'].=' '. $paragraph;
-            //bm_d('',$paragraph, 'contains paragraph', 'dsm');
             $fields = $this->get_type_fields($paragraph);
-            // bm_d('', $fields, 'paragraph fields', 'dsm');
             $this->populate_combinedERD_ERD_per_bundle($fields, $depth+1, $this->combinedERD[$data['machineName']]['field_path'].'.');
           }
           break;
@@ -550,9 +546,7 @@ class BMConfigSyncHandler {
               $this->combinedERD[$data['machineName']]['children'] .=' '. $vocabulary;
               $this->ERD[$data['bundle']][$data['machineName']]['children'].=' '. $vocabulary;
 
-              //   bm_d('',$vocabulary, 'contains vocabulary', 'dsm');
               $fields  = $this->get_type_fields($vocabulary);
-           //   bm_d('',$fields, 'taxonomy fields','dsm');
               $this->populate_combinedERD_ERD_per_bundle($fields, $depth+1, $this->combinedERD[$data['machineName']]['field_path'].'.');
             }
           }else{

@@ -1,12 +1,18 @@
-bm_config_sys.batch_css:
+bm_config_sync.batch_css:
   version: 1.0
   css:
     theme:
       css/bm_config_sys_batch.css: {}
 
-bm_config_sys.batch_js:
+bm_config_sync.batch_js:
   version: 1.0
   js:
     js/bm_config_sys_batch.js: {}
   dependencies:
     - core/jquery
+
+bm_config_sync.admin_styles:
+  version: 1.0
+  css:
+    theme:
+      css/bm_config_sync_admin.css: {}

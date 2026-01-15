@@ -1,7 +1,11 @@
-name: 'Configurations export and import Module'
+name: BM Config import export manager
 type: module
-description: 'A module to compare and synchronize configurations and display ERD.'
+description: 'Synchronize, Import & Export complete entities with their related fields, references and entities.'
 core_version_requirement: 11.x
 package: Blue Marloc
 dependencies:
   - drupal:config
+  - bm_main:bm_main
+  - bm_tooltip:bm_tooltip
+  - bm_panels:bm_panels
+  - bm_import:bm_import

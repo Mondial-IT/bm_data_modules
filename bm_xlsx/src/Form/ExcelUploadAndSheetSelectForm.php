@@ -56,7 +56,7 @@ class ExcelUploadAndSheetSelectForm extends FormBase{
    * {}
    */
   public function getFormId(): string {
-    return 'upload-and-sheet-select-form';
+    return 'bm_xlsx_upload_and_sheet_select_form';
   }
 
 
@@ -276,7 +276,7 @@ class ExcelUploadAndSheetSelectForm extends FormBase{
     $form['panels']['panel1-wrapper']['panel1']['sheet-selection-wrapper']['upload-excel'] = [
       '#type' => 'link',
       '#title' => $file_path ? 'Change Excel':'Upload Excel',
-      '#url' => Url::fromRoute('bm_main.xlsx_upload_form'),
+      '#url' => Url::fromRoute('bm_xlsx.excel_upload_and_sheet_select_form'),
       '#attributes' => ['class' => ['button','upload-excel-dialog']],
       '#ajax' => [
         'dialogType' => 'modal',

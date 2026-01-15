@@ -8,22 +8,17 @@ namespace Drupal\bm_config_sync\Form;
 
 
 use Drupal;
-use Drupal\bm_config_sync\Controller\BMConfigSyncController;
 use Drupal\bm_config_sync\Handler\BMConfigSyncHandler;
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\Ajax\InvokeCommand;
-use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Config\ConfigImporter;
-use Drupal\Core\Config\FileStorage;
-use Drupal\Core\Config\StorageComparer;
-use Drupal\Core\File\FileSystem;
-use Drupal\Core\Form\FormBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Config\Config;
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Markup;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class BMTemplateForm for a Drupal settings form with AJAX table select functionality.
@@ -94,12 +89,15 @@ class BMConfigSyncERDBuilderForm extends FormBase {
 
   public string $exportedYML;
 
-  public BMConfigSyncHandler $configSyncHandler;
+  protected BMConfigSyncHandler $configSyncHandler;
 
-  private Drupal\Core\Config\Config $config;
+  private Config $config;
 
-  public function __construct() {
-
+  public static function create(ContainerInterface $container): self {
+    /** @var self $instance */
+    $instance = parent::create($container);
+    $instance->configSyncHandler = $container->get('bm_config_sync.handler');
+    return $instance;
   }
 
   /**
@@ -126,62 +124,28 @@ class BMConfigSyncERDBuilderForm extends FormBase {
    * Builds the settings form.
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    // Attach the bm_tippy tooltip library to the form.
-    $form['#attached']['library'][] = 'ziston/tippyjs';
-    $form['#attached']['library'][] = 'ziston/bm_tippyjs';
+    $form['#attached']['library'][] = 'bm_tooltip/tooltip';
     $form['#attached']['library'][] = 'bm_main/datatablesjs';
+    $form['#attached']['library'][] = 'bm_config_sync/admin_styles';
+    $form['#attributes']['class'][] = 'bm-config-sync-form';
 
     $this->ERD = [];
     $this->exportedYML = '';
 
-    $this->panel_select($form, $form_state, 'panel1');
-
-
     $form['panels'] = [
-      '#prefix' => '<div id="' . self::ID_ERD_PANELS . '">',
-      '#suffix' => '</div>',
-    ];
-
-
-    // Inject CSS styles directly into the page.
-    $form['custom_styles'] = [
-      '#type' => 'markup',
-      '#markup' => Markup::create('<style>
-         #id-selector-panel{
-            width: 800px;
-         }
-         #id-erd-panels{
-            margin-top: 30px;
-         }
-
-         .panel td,.panel th{
-            white-space: nowrap;
-            }
-        .ajax-response {
-            color: green;font-family:"monospace"; max-height:300px;overflow:auto;
-            }
-
-        .table-select-panel {
-            margin: 10px; border: 1px solid #ccc; padding: 15px;
-            }
-        .table-select-panel {
-            max-height:500px;overflow-y:auto;
-            }
-        .button-container button {
-            margin-right: 5px;
-            }
-        hr{
-            clear:both;
-            }
-      </style>'),
+      '#type' => 'bm_panels',
+      '#collection' => 'bm_config_sync_erd_builder',
+      '#instance_id' => 'bm_config_sync_erd_builder',
+      '#columns' => 12,
+      '#attributes' => ['id' => self::ID_ERD_PANELS],
     ];
 
     $form['intro'] = [
-      '#markup' => '<p>Build Entity Relations Diagram table.</p>',
+      '#markup' => '<p>BMConfigSyncERDBuilderForm - Build Entity Relations Diagram table.</p>',
     ];
 
-
-    $this->panel_combined_ERD($form['panels'], $form_state, 'panel4');
+    $this->panel_select($form, $form_state);
+    $this->panel_combined_ERD($form, $form_state);
 
     return $form;
   }
@@ -189,25 +153,28 @@ class BMConfigSyncERDBuilderForm extends FormBase {
   private function panel_select(array &$form, FormStateInterface $form_state): void {
     $this->config = \Drupal::configFactory()->getEditable('bm_config_sync.settings');
 
-    $form['select'] =
-      [
-        '#prefix' => Markup::create('<div id="id-selector-panel" class="panel panel-item-selector" >'
-          . bm_main_panel_title_and_help(
-            'DISPLAY ENTITY RELATIONS TABLES',
-            'Display the content type and its fields. Or click and select to filter the fields of the content type in the list below.'
-          )),
-        '#suffix' => '</div>',
-      ];
+    $panel =& $form['panels'][self::PANEL_NODE];
+    $panel['#title'] = $this->t('Entity selectors');
+    $panel['#description'] = $this->t('Choose a node or taxonomy bundle and toggle the ERD columns to focus your analysis.');
+    $panel['#panel_description'] = $this->t('Display the content type and its fields, then filter the rendered ERD by bundle or column.');
+    $panel['#bm_panels'] = [
+      'draggable' => TRUE,
+      'removable' => FALSE,
+      'width' => 4,
+      'height' => 6,
+      'minWidth' => 3,
+      'minHeight' => 4,
+      'x' => 0,
+      'y' => 0,
+    ];
+    $panel['#attributes']['id'] = 'id-selector-panel';
 
-    $this->nodeSelector($form, $form_state);
-
-    $this->taxonomySelector($form, $form_state);
-
-    $this->columnSelector($form, $form_state);
-
+    $this->nodeSelector($panel, $form_state);
+    $this->taxonomySelector($panel, $form_state);
+    $this->columnSelector($panel, $form_state);
   }
 
-  private function nodeSelector(&$form, $form_state): void {
+  private function nodeSelector(array &$panel, FormStateInterface $form_state): void {
     #options=[];
     $entitiesList = [];
     try {
@@ -222,12 +189,13 @@ class BMConfigSyncERDBuilderForm extends FormBase {
     foreach ($entitiesList as $entityMName => $entityLabel) {
       $options[$entityMName] = $entityMName;
     }
-    $form['select'][self::TABLE_SELECT_NODE] = [
+    $panel[self::TABLE_SELECT_NODE] = [
       '#type' => 'select',
       '#title' => 'Content type',
       '#options' => $options,
       '#empty' => $this->t('No items available.'),
       '#multiple' => FALSE,
+      '#parents' => [self::TABLE_SELECT_NODE],
       '#ajax' => [
         'callback' => '::ajaxOnChangeRadioButton',
         'wrapper' => self::ID_PANEL_NODE_FIELDS,
@@ -237,7 +205,7 @@ class BMConfigSyncERDBuilderForm extends FormBase {
     ];
   }
 
-  private function taxonomySelector(&$form, $form_state): void {
+  private function taxonomySelector(array &$panel, FormStateInterface $form_state): void {
     // TAXONOMY SELECTOR
 
     $entitiesList = [];
@@ -254,12 +222,13 @@ class BMConfigSyncERDBuilderForm extends FormBase {
     foreach ($entitiesList as $entityMName => $entityLabel) {
       $options[$entityMName] = $entityMName;
     }
-    $form['select'][self::TABLE_SELECT_TAXONOMY] = [
+    $panel[self::TABLE_SELECT_TAXONOMY] = [
       '#type' => 'select',
       '#title' => 'Taxonomy',
       '#options' => $options,
       '#multiple' => FALSE,
       '#empty' => $this->t('No items available.'),
+      '#parents' => [self::TABLE_SELECT_TAXONOMY],
       '#ajax' => [
         'callback' => '::ajaxOnChangeRadioButton',
         'wrapper' => self::ID_PANEL_TAXONOMY_FIELDS,
@@ -272,9 +241,8 @@ class BMConfigSyncERDBuilderForm extends FormBase {
   }
 
 
-  private function columnSelector(&$form, $form_state): void {
+  private function columnSelector(array &$panel, FormStateInterface $form_state): void {
     //  $this->config->set('displayed_columns', ['id'])->save(); // to reset a wrong config
-    $this->configSyncHandler = new BMConfigSyncHandler();
     // currently set column filter
     $displayedColumns = $this->config->get('displayed_columns') ?? ['id', 'field_name', 'label'];
 
@@ -311,7 +279,7 @@ class BMConfigSyncERDBuilderForm extends FormBase {
     }
 
 
-    $form['select'][self::TABLE_SELECT_COLUMNS] = [
+    $panel[self::TABLE_SELECT_COLUMNS] = [
       '#type' => 'select',
       '#title' => 'Columns',
       '#options' => $options,
@@ -319,6 +287,7 @@ class BMConfigSyncERDBuilderForm extends FormBase {
       '#empty' => $this->t('No items available.'),
       '#prefix' => '<div id="' . self::ID_TABLE_SELECT_COLUMNS . '">',
       '#suffix' => '</div>',
+      '#parents' => [self::TABLE_SELECT_COLUMNS],
       '#ajax' => [
         'callback' => '::ajaxOnChangeRadioButton',
         'event' => 'change',
@@ -531,29 +500,20 @@ class BMConfigSyncERDBuilderForm extends FormBase {
     return $bundleFilter;
   }
 
-  private function panel_combined_ERD(array &$form, FormStateInterface $form_state, string $gridClass): void {
+  private function panel_combined_ERD(array &$form, FormStateInterface $form_state): void {
 
-    $style = Markup::create('
-      <style>
-
-        #panel-erd .erd-field-settings{
-            max-height:1em;
-
-        }
-        #panel-erd .erd-field-description{
-            font-size:0.7em;
-            width:400px;
-        }
-        #panel-erd .erd-field-field_path{
-         max-width:200px;
-        }
-        #panel-erd tr td,
-        #panel-erd thead th
-        {
-
-            overflow-y:auto;
-        }
-        </style>');
+    $panel =& $form['panels'][self::PANEL_ERD];
+    $panel['#attributes']['id'] = self::ID_PANEL_ERD;
+    $panel['#bm_panels'] = [
+      'draggable' => TRUE,
+      'removable' => FALSE,
+      'width' => 8,
+      'height' => 6,
+      'minWidth' => 5,
+      'minHeight' => 4,
+      'x' => 4,
+      'y' => 0,
+    ];
 
     // retrieve selected content type.
     // $bundleFilter = $form_state->getUserInput()[self::TABLE_SELECT_NODE] ?? '';
@@ -565,15 +525,8 @@ class BMConfigSyncERDBuilderForm extends FormBase {
     // Fetch field data
     $this->configSyncHandler->populate_combinedERD_ERD_per_bundle($fields);
 
-    $form[self::PANEL_ERD] =
-      [
-        '#markup' => $style,
-        '#prefix' =>
-          Markup::create('<div id="' . self::ID_PANEL_ERD . '" class="panel ' . $gridClass . '"><h1>' . $bundleFilter . '</h1>'
-            . bm_main_panel_title_and_help('ENTITY RELATIONS PANEL', '')
-          ),
-        '#suffix' => '</div>',
-      ];
+    $panel['#title'] = $bundleFilter ? $this->t('@bundle ERD', ['@bundle' => $bundleFilter]) : $this->t('Entity relations panel');
+    $panel['#panel_description'] = $this->t('Combined ERD table with dynamic column visibility and export controls.');
 
     // Retrieve created ERD. i.e. node.field_bm_id => [bundle=>, description=>, settings=>, type=>integer]
     $rows = $this->configSyncHandler->getCombinedERD();
@@ -581,7 +534,7 @@ class BMConfigSyncERDBuilderForm extends FormBase {
     // display all data in one combined table
     //sort($entitiesList);
     if (count($rows) > 0) {
-      $header = [];
+
       // displayed columns as selected by the select columns select element
       $displayedColumns = $this->config->get('displayed_columns') ?? ['id', 'field_name'];
 
@@ -631,7 +584,7 @@ class BMConfigSyncERDBuilderForm extends FormBase {
       $CSSSelector = '.' . $bundleFilter;
       $this->dataTablesEnhancement($form, $CSSSelector);
 
-      $form[self::PANEL_ERD][self::TABLE_ERD] = [
+      $panel[self::TABLE_ERD] = [
         '#type' => 'table',
         '#attributes' => ['class' => ['DataTableJS', $Selector]],
         '#header' => $header,
@@ -640,13 +593,13 @@ class BMConfigSyncERDBuilderForm extends FormBase {
       ];
 
       // AJAX Response div for displaying processed rows.
-      $form[self::PANEL_ERD]['response_4'] = [
+      $panel['response_4'] = [
         '#type' => 'container',
-        '#attributes' => ['id' => self::ID_AJAX_ERD_RESPONSE, 'class' => ['ajax-response-node-fields']],
+        '#attributes' => ['id' => self::ID_AJAX_ERD_RESPONSE, 'class' => ['ajax-response-node-fields', 'bm-config-sync-ajax-response']],
       ];
 
       // Export button for fields.
-      $form[self::PANEL_ERD]['field_export'] = [
+      $panel['field_export'] = [
         '#type' => 'button',
         '#value' => $this->t('Process'),
         '#name' => self::BTN_PROCESS_ERD,
@@ -672,7 +625,7 @@ class BMConfigSyncERDBuilderForm extends FormBase {
   function ajaxOnChangeRadioButton(array &$form, FormStateInterface $form_state): AjaxResponse {
     $response = new AjaxResponse();
     $selector = '#' . self::ID_ERD_PANELS;
-    $response->addCommand(new ReplaceCommand('.form-item-select-columns', $form['select'][self::TABLE_SELECT_COLUMNS]));
+    $response->addCommand(new ReplaceCommand('.form-item-select-columns', $form['panels'][self::PANEL_NODE][self::TABLE_SELECT_COLUMNS]));
     $response->addCommand(new ReplaceCommand($selector, $form['panels']));
     $response->addCommand(new InvokeCommand($selector, 'fadeOut', [200])); // Fade out for 500ms
     $response->addCommand(new InvokeCommand($selector, 'fadeIn', [1000]));  // Fade in for 500ms

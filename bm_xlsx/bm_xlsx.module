@@ -4,6 +4,7 @@
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
    Created on 2024-11-21 at 11:32:11
  */
+require_once __DIR__ . '/vendor/autoload.php';
 function bm_xlsx_help($route_name, $route_match): string {
   if ($route_name == 'help.page.bm_xlsx') {
     return

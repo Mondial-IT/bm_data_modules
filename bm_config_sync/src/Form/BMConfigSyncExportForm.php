@@ -12,18 +12,18 @@ use Drupal\bm_config_sync\Controller\BMConfigSyncController;
 use Drupal\bm_config_sync\Handler\BMConfigSyncHandler;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\HtmlCommand;
 use Drupal\Core\Ajax\InvokeCommand;
+use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Config\ConfigImporter;
 use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\StorageComparer;
-use Drupal\Core\File\FileSystem;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\HtmlCommand;
-use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Render\Markup;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class BMTemplateForm for a Drupal settings form with AJAX table select functionality.
@@ -87,7 +87,7 @@ class BMConfigSyncExportForm extends FormBase {
 
   const ID_AJAX_EXPORT_TAXONOMY_FIELDS_RESPONSE = 'ID_AJAX_EXPORT_TAXONOMY_FIELDS_RESPONSE';
 
-  private BMConfigSyncHandler $configSyncHandler;
+  protected BMConfigSyncHandler $configSyncHandler;
 
   /**
    * {@inheritdoc}
@@ -96,8 +96,11 @@ class BMConfigSyncExportForm extends FormBase {
     return 'bm_config_sync_export_form';
   }
 
-  public function __construct() {
-    $configSyncHandler = new BMConfigSyncHandler();
+  public static function create(ContainerInterface $container): self {
+    /** @var self $instance */
+    $instance = parent::create($container);
+    $instance->configSyncHandler = $container->get('bm_config_sync.handler');
+    return $instance;
   }
 
   /**
@@ -117,47 +120,17 @@ class BMConfigSyncExportForm extends FormBase {
    * Builds the settings form.
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    // Attach the bm_tippy tooltip library to the form.
-    $form['#attached']['library'][] = 'ziston/tippyjs';
-    $form['#attached']['library'][] = 'ziston/bm_tippyjs';
-
-    // configurable grid, $gridClasses.
-    $style = Markup::create('<style>
-        /* row 1, column 1, 2 and 3. */
-        .panel1 { grid-column: 1 / 2; grid-row: 1 / 2; }
-        .panel2 { grid-column: 2 / 3; grid-row: 1 / 2; }
-        .panel3 { grid-column: 3 / 4; grid-row: 1 / 2; }
-        /* row 2 */
-        .panel4 { grid-column: 1 / 2; grid-row: 2 / 3; }
-        .panel5 { grid-column: 2 / 3; grid-row: 2 / 3; }
-        .panel6 { grid-column: 3 / 4; grid-row: 2 / 3; }
-        /* row 3 */
-        .panel7 { grid-column: 1 / 2; grid-row: 3 / 4; }
-        .panel8 { grid-column: 2 / 3; grid-row: 3 / 4; }
-        .panel9 { grid-column: 3 / 4; grid-row: 3 / 4; }
-    </style>
-    ');
+    $form['#attached']['library'][] = 'bm_tooltip/tooltip';
+    $form['#attached']['library'][] = 'bm_config_sync/admin_styles';
+    $form['#attributes']['class'][] = 'bm-config-sync-form';
 
     $form['panels'] = [
-      '#markup' => $style,
-      '#prefix' => '<div class="grid-fr-fr-fr gap-20">',
+      '#prefix' => '<div class="grid-fr-fr-fr gap-20 bm-config-sync-grid">',
       '#suffix' => '</div>',
     ];
-
-    // Inject CSS styles directly into the page.
-    $form['custom_styles'] = [
-      '#type' => 'markup',
-      '#markup' => Markup::create('<style>
-
-        .ajax-response { color: green;font-family:"monospace"; max-height:300px;overflow:auto; }
-
-        .table-select-panel { margin: 10px; border: 1px solid #ccc; padding: 15px; }
-        .table-select-panel { max-height:500px;overflow-y:auto;}
-        .button-container button { margin-right: 5px; }
-        hr{ clear:both;}
-      </style>' .
-        '<p>run: <i>/drupal_root/web/sites/bmlistings: drush config:export --destination=sites/bmlistings/files/configexport</i></p>' .
-        '<p>ends up here: <i>/home/bluemarloc/drupal_devj/docker_volume_app/git_root/drupal_root/web/bmlfiles</i></p>'),
+    $form['export_notes'] = [
+      '#markup' => '<p>run: <i>/drupal_root/web/sites/bmlistings: drush config:export --destination=sites/bmlistings/files/configexport</i></p>
+        <p>ends up here: <i>/home/bluemarloc/drupal_devj/docker_volume_app/git_root/drupal_root/web/bmlfiles</i></p>',
     ];
 
     // /home/bluemarloc/drupal_devj/docker_volume_app/git_root/drupal_root/web/bmlfiles
@@ -254,7 +227,7 @@ class BMConfigSyncExportForm extends FormBase {
     // Response div for displaying resulting yaml
     $form[self::PANEL_NODE]['panel_node_response'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => self::ID_AJAX_NODE_EXPORT_RESPONSE, 'class' => ['ajax-response-nodes ajax-response']],
+      '#attributes' => ['id' => self::ID_AJAX_NODE_EXPORT_RESPONSE, 'class' => ['ajax-response-nodes', 'bm-config-sync-ajax-response']],
     ];
 
 
@@ -333,7 +306,7 @@ class BMConfigSyncExportForm extends FormBase {
       '#type' => 'container',
       '#attributes' => [
         'id' => self::ID_AJAX_EXPORT_PARAGRAPH_RESPONSE,
-        'class' => ['ajax-response-paragraphs ajax-response']
+        'class' => ['ajax-response-paragraphs', 'bm-config-sync-ajax-response']
       ],
     ];
 
@@ -411,7 +384,7 @@ class BMConfigSyncExportForm extends FormBase {
       '#type' => 'container',
       '#attributes' => [
         'id' => self::ID_AJAX_TAXONOMY_EXPORT_RESPONSE,
-        'class' => ['ajax-response-taxonomies ajax-response']
+        'class' => ['ajax-response-taxonomies', 'bm-config-sync-ajax-response']
       ],
     ];
 
@@ -488,7 +461,7 @@ class BMConfigSyncExportForm extends FormBase {
     // AJAX Response div for displaying processed rows.
     $form[self::PANEL_NODE_FIELDS]['response_4'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => self::ID_AJAX_EXPORT_NODE_FIELDS_RESPONSE, 'class' => ['ajax-response-node-fields']],
+      '#attributes' => ['id' => self::ID_AJAX_EXPORT_NODE_FIELDS_RESPONSE, 'class' => ['ajax-response-node-fields', 'bm-config-sync-ajax-response']],
     ];
 
     // Export button for fields.
@@ -518,7 +491,7 @@ class BMConfigSyncExportForm extends FormBase {
     ];
 
     $bundleFilter = $form_state->getUserInput()[self::TABLE_SELECT_PARAGRAPH] ?? 'paragraph';
-    $entitiesList = $this->get_type_fields($bundleFilter ?? 'paragraph'); // Fetch all field configurations
+    $entitiesList = $this->get_all_fields_and_bundle_names($bundleFilter ?? 'paragraph'); // Fetch all field configurations
     //sort($entitiesList);
 
     $header = [
@@ -561,7 +534,7 @@ class BMConfigSyncExportForm extends FormBase {
     // AJAX Response div for displaying processed rows.
     $form[self::PANEL_PARAGRAPH_FIELDS]['response_4'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => self::ID_AJAX_EXPORT_PARAGRAPH_FIELDS_RESPONSE, 'class' => ['ajax-response-fields']],
+      '#attributes' => ['id' => self::ID_AJAX_EXPORT_PARAGRAPH_FIELDS_RESPONSE, 'class' => ['ajax-response-fields', 'bm-config-sync-ajax-response']],
     ];
 
     // Export button for fields.
@@ -587,7 +560,7 @@ class BMConfigSyncExportForm extends FormBase {
     ];
 
     $bundleFilter = $form_state->getUserInput()[self::TABLE_SELECT_TAXONOMY] ?? '';
-    $entitiesList = $this->get_type_fields($bundleFilter ?? 'taxonomy'); // Fetch all field configurations
+    $entitiesList = $this->get_all_fields_and_bundle_names($bundleFilter ?? 'taxonomy'); // Fetch all field configurations
 
 
     //sort($entitiesList);
@@ -634,7 +607,7 @@ class BMConfigSyncExportForm extends FormBase {
       '#type' => 'container',
       '#attributes' => [
         'id' => self::ID_AJAX_EXPORT_TAXONOMY_FIELDS_RESPONSE,
-        'class' => ['ajax-response-taxonomy-fields']
+        'class' => ['ajax-response-taxonomy-fields', 'bm-config-sync-ajax-response']
       ],
     ];
 
@@ -783,7 +756,7 @@ class BMConfigSyncExportForm extends FormBase {
 
     $result_message = empty($exportedYML)
       ? $this->t('No data available.')
-      : Markup::create('<textarea cols="61" rows="10" class="panel" style="margin-left:10px;">' . $exportedYML . '</textarea>');
+      : Markup::create('<textarea cols="61" rows="10" class="bm-config-sync-textarea">' . $exportedYML . '</textarea>');
 
     // Update the response div.
     $response->addCommand(new HtmlCommand($responseSelector, $result_message . $response_message));
@@ -892,7 +865,7 @@ class BMConfigSyncExportForm extends FormBase {
       '#prefix' =>
         Markup::create('<div class="panel ' . $gridClass . '">' .
           bm_main_panel_title_and_help('Export all', 'Export all configs listed above')
-          . '<div style="display:flex;flex-direction: column;justify-content: space-evenly;"'),
+          . '<div class="bm-config-sync-flex-column">'),
       '#suffix' => '</div></div>',
     ];
 
@@ -929,7 +902,7 @@ class BMConfigSyncExportForm extends FormBase {
     // Response div for displaying processed rows.
     $form['table_select_panel0']['response-0'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-response-0', 'class' => ['ajax-response']],
+      '#attributes' => ['id' => 'ajax-response-0', 'class' => ['bm-config-sync-ajax-response']],
     ];
 
     $form['panel_export_configs']['export_all_configuration_diffs'] = [

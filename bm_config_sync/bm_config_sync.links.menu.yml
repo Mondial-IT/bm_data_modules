@@ -1,7 +1,7 @@
 bm_config_sync.bluemarloc:
   title: 'bm_config_sync'
   description: 'config bm_config_sync'
-  parent: bm_main.bluemarloc_admin
+  parent: bm_main.bluemarloc_data
   route_name: bm_config_sync.settings_form
   weight: 1
 #
@@ -12,15 +12,22 @@ bm_config_sync.bm_config_sync_settings_form:
   route_name: bm_config_sync.settings_form
   weight: 10
 #
+bm_config_sync.bm_config_sync_erd_builder_form:
+  title: 'BMConfigSyncERDBuilderForm'
+  description: '?'
+  parent: bm_config_sync.bluemarloc
+  route_name: bm_config_sync.bm_config_sync_erd_builder_form
+  weight: 15
+#
 bm_config_sync.bm_config_sync_combined_erd_form:
-  title: 'Combined ERDs'
+  title: 'Combined ERDs BMConfigSyncCombinedERDForm'
   description: 'Create entity relations table of an entity and its dependents'
   parent: bm_config_sync.bluemarloc
   route_name: bm_config_sync.bm_config_sync_combined_erd_form
   weight: 20
 #
 bm_config_sync.bm_config_sync_individual_erd_form:
-  title: 'Individual ERDs'
+  title: 'Individual ERDs BMConfigSyncIndividualERDForm'
   description: 'Create entity relations table per entity'
   parent: bm_config_sync.bluemarloc
   route_name: bm_config_sync.bm_config_sync_individual_erd_form
@@ -28,7 +35,7 @@ bm_config_sync.bm_config_sync_individual_erd_form:
 #
 
 bm_config_sync.bm_config_sync_uuid_form:
-  title: 'Sync config UUIDs with a target'
+  title: 'Sync config UUIDs with a target ConfigSyncUUIDForm'
   description: 'Adopt UUIDs from a target instance'
   parent: bm_config_sync.bluemarloc
   route_name: bm_config_sync.bm_config_sync_uuid_form
@@ -40,6 +47,7 @@ bm_config_sync.bm_config_sync_importexport_form:
   parent: bm_config_sync.bluemarloc
   route_name: bm_config_sync.bm_config_sync_import_export_form
   weight: 30
+#
 bm_config_sync.bm_config_sync_export_form:
   title: 'export'
   description: 'export'

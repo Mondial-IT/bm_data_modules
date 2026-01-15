@@ -4,7 +4,7 @@ top_level: true
 ---
 <h2>{% trans %}Upload and preview an Excel file{% endtrans %}</h2>
 <ol>
-  <li>{% trans %}Go to <strong>Configuration → Development → Excel upload</strong>.{% endtrans %}</li>
+  <li>{% trans %}Go to <strong>Configuration → System → Excel module</strong> or visit <code>/admin/config/system/bm-xlsx/settings</code>.{% endtrans %}</li>
   <li>{% trans %}Choose an <code>.xlsx</code> file from your computer and submit the form.{% endtrans %}</li>
   <li>{% trans %}Select the worksheet you want to inspect. The preview displays the first rows with cell styling where available.{% endtrans %}</li>
 </ol>
@@ -13,6 +13,14 @@ top_level: true
 <ul>
   <li>{% trans %}The selection is cached, allowing import modules to reuse the chosen sheet without re-uploading the file.{% endtrans %}</li>
   <li>{% trans %}Use the color preview to confirm that important headers or warning rows remain styled in the source spreadsheet.{% endtrans %}</li>
+</ul>
+
+<h2>{% trans %}Design guidance for implementers{% endtrans %}</h2>
+<ul>
+  <li>{% trans %}Embed the upload form where needed via the form builder so other modules can let users pick a sheet and row limit without duplicating UI.{% endtrans %}</li>
+  <li>{% trans %}Consume the BMXLSX service for sheet names, headers, rows, and color metadata instead of accessing cached globals.{% endtrans %}</li>
+  <li>{% trans %}For very large workbooks, consider converting to CSV or requesting only the needed columns to keep previews responsive.{% endtrans %}</li>
+  <li>{% trans %}If your site is connected to AI services, you can feed the uploaded sheet into downstream pipelines for summarization or anomaly checks after validating permissions.{% endtrans %}</li>
 </ul>
 
 <h2>{% trans %}Troubleshooting{% endtrans %}</h2>

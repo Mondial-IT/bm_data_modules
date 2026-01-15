@@ -40,19 +40,10 @@ class BMConfigSyncImportForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $form = parent::buildForm($form, $form_state);
 
-    // Attach the bm_tippy library to the form.
-    $form['#attached']['library'][] = 'ziston/tippyjs';
-    $form['#attached']['library'][] = 'ziston/bm_tippyjs';
-
-    // Inject CSS styles directly into the page.
-    $form['custom_styles'] = [
-      '#type' => 'markup',
-      '#markup' => Markup::create('<style>
-        .ajax-response { font-weight: bold; color: green; max-height:300px;overflow:auto;}
-        .table-select-panel { margin: 10px; border: 1px solid #ccc; padding: 15px; }
-        .button-container button { margin-right: 5px; }
-      </style>'),
-    ];
+    // Attach supporting libraries.
+    $form['#attached']['library'][] = 'bm_tooltip/tooltip';
+    $form['#attached']['library'][] = 'bm_config_sync/admin_styles';
+    $form['#attributes']['class'][] = 'bm-config-sync-form';
 
     // Detect the button clicked and call the action function.
     if ($form_state->getTriggeringElement()) {
@@ -66,7 +57,7 @@ class BMConfigSyncImportForm extends ConfigFormBase {
     ];
 
     // Panel with table select and buttons.
-    $form['panels']['#prefix'] = Markup::create('<div style="display: grid;grid-template-columns: repeat(3, 1fr);gap: 10px;">');
+    $form['panels']['#prefix'] = Markup::create('<div class="bm-config-sync-panel-grid">');
     $this->panel_table_contenttypes($form['panels'], $form_state);
     $this->panel_table_taxonomies($form['panels'], $form_state);
     $this->panel_table_paragraphs($form['panels'], $form_state);
@@ -77,7 +68,11 @@ class BMConfigSyncImportForm extends ConfigFormBase {
   }
 
   private function panel_table_contenttypes(array &$form, FormStateInterface $form_state): void {
-    $form['table_select_panel1']['#prefix'] = '<div class="panel"><h2>NODE CONFIG IMPORT</h2><hr>';
+    $panel_title = $this->t('Node config import');
+    $panel_help = $this->t('Import content type definition YAML from the private sync directory. The table lists every available node bundle export.');
+    $form['table_select_panel1']['#prefix'] = '<div class="bm-config-sync-panel">'
+      . $this->buildPanelHeading($panel_title, $panel_help)
+      . '<hr>';
     $form['table_select_panel1']['#suffix'] = '</div>';
 
     $panel = [
@@ -112,7 +107,7 @@ class BMConfigSyncImportForm extends ConfigFormBase {
     // Response div for displaying processed rows.
     $form['table_select_panel1']['response-1'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-response-1', 'class' => ['ajax-response']],
+      '#attributes' => ['id' => 'ajax-response-1', 'class' => ['bm-config-sync-ajax-response']],
     ];
 
     // Separate AJAX buttons.
@@ -132,7 +127,11 @@ class BMConfigSyncImportForm extends ConfigFormBase {
   }
 
   private function panel_table_taxonomies(array &$form, FormStateInterface $form_state): void {
-    $form['table_select_panel2']['#prefix'] = '<div class="panel"><h2>VOCABULARY CONFIG IMPORT</h2><hr>';
+    $panel_title = $this->t('Vocabulary config import');
+    $panel_help = $this->t('Import taxonomy vocabulary configuration files, including their field storage.');
+    $form['table_select_panel2']['#prefix'] = '<div class="bm-config-sync-panel">'
+      . $this->buildPanelHeading($panel_title, $panel_help)
+      . '<hr>';
     $form['table_select_panel2']['#suffix'] = '</div>';
 
     $panel = [
@@ -168,7 +167,7 @@ class BMConfigSyncImportForm extends ConfigFormBase {
     // Response div for displaying processed rows.
     $form['table_select_panel2']['response_2'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-response-2', 'class' => ['ajax-response']],
+      '#attributes' => ['id' => 'ajax-response-2', 'class' => ['bm-config-sync-ajax-response']],
     ];
 
     // Separate AJAX buttons.
@@ -189,7 +188,11 @@ class BMConfigSyncImportForm extends ConfigFormBase {
   }
 
   private function panel_table_paragraphs(array &$form, FormStateInterface $form_state): void {
-    $form['table_select_panel3']['#prefix'] = '<div class="panel"><h2>PARAGRAPH CONFIG IMPORT</h2><hr>';
+    $panel_title = $this->t('Paragraph config import');
+    $panel_help = $this->t('Import paragraph bundle definitions and field storage YAML.');
+    $form['table_select_panel3']['#prefix'] = '<div class="bm-config-sync-panel">'
+      . $this->buildPanelHeading($panel_title, $panel_help)
+      . '<hr>';
     $form['table_select_panel3']['#suffix'] = '</div>';
 
     $panel = [
@@ -225,7 +228,7 @@ class BMConfigSyncImportForm extends ConfigFormBase {
     // ajax Response div for displaying processed rows.
     $form['table_select_panel3']['response_3'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-response-3', 'class' => ['ajax-response']],
+      '#attributes' => ['id' => 'ajax-response-3', 'class' => ['bm-config-sync-ajax-response']],
     ];
 
     // Separate AJAX buttons.
@@ -244,7 +247,11 @@ class BMConfigSyncImportForm extends ConfigFormBase {
 
   }
   private function panel_table_fields(array &$form, FormStateInterface $form_state): void {
-    $form['table_select_panel4']['#prefix'] = '<div class="panel"><h2>FIELD CONFIG IMPORT</h2><hr>';
+    $panel_title = $this->t('Field config import');
+    $panel_help = $this->t('Import individual field configuration YAML files that belong to existing bundles.');
+    $form['table_select_panel4']['#prefix'] = '<div class="bm-config-sync-panel">'
+      . $this->buildPanelHeading($panel_title, $panel_help)
+      . '<hr>';
     $form['table_select_panel4']['#suffix'] = '</div>';
 
     $panel = [
@@ -279,7 +286,7 @@ class BMConfigSyncImportForm extends ConfigFormBase {
     // Response div for displaying processed rows.
     $form['table_select_panel4']['response-4'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'ajax-response-4', 'class' => ['ajax-response']],
+      '#attributes' => ['id' => 'ajax-response-4', 'class' => ['bm-config-sync-ajax-response']],
     ];
 
     // Separate AJAX buttons.
@@ -409,6 +416,34 @@ class BMConfigSyncImportForm extends ConfigFormBase {
     }
     // Clear the table select checkboxes after processing.
     $form_state->setRebuild();
+  }
+
+
+  /**
+   * Builds a heading row with tooltip helper markup.
+   */
+  private function buildPanelHeading(string $title, string $description): string {
+    $render_array = [
+      '#type' => 'inline_template',
+      '#template' => '<div class="bm-config-sync-panel__heading"><h2>{{ title }}</h2>{{ tooltip(description, "Info", options) }}</div>',
+      '#context' => [
+        'title' => $title,
+        'description' => $description,
+        'options' => [
+          'theme' => 'dark',
+          'position' => 'bottom',
+          'edge' => TRUE,
+          'tag' => 'button',
+          'class' => 'bm-config-sync-panel__info',
+          'attributes' => [
+            'type' => 'button',
+            'aria-label' => $this->t('Panel info: @title', ['@title' => $title]),
+          ],
+        ],
+      ],
+    ];
+
+    return (string) \Drupal::service('renderer')->renderPlain($render_array);
   }
 
 

@@ -1,0 +1,3 @@
+services:
+  bm_config_sync.handler:
+    class: Drupal\bm_config_sync\Handler\BMConfigSyncHandler

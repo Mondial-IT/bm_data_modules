@@ -2,6 +2,7 @@
 namespace Drupal\bm_config_sync\Form;
 
 use Drupal;
+use Drupal\bm_config_sync\Utility\BMConfigSyncPathHelper;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -10,8 +11,6 @@ use Symfony\Component\Yaml\Yaml;
  * Class ConfigSyncUUIDForm.
  */
 class ConfigSyncUUIDForm extends FormBase {
-  const CONFIG_SYNC_PATH = DRUPAL_ROOT . '/../config_sync/bmlistings';
-  const CONFIG_SYNC_UUID_PATH = DRUPAL_ROOT . '/../config_sync_uuid/bmlistings';
   const SQL_DUMP_PATH = DRUPAL_ROOT . '/../private/bmlistings/backup_migrate/latest-backup-for-config-sync.mysql'; // Adjust to your actual dump file path.
 
   /**
@@ -30,7 +29,7 @@ class ConfigSyncUUIDForm extends FormBase {
     $form['description'] = [
       '#type' => 'markup',
       '#markup' => '<p>Select configurations to synchronize UUIDs.</p>
-      <p>This compares the <i>config_sync_uuid</i> directory with the current installation UUIDs and displays where changes are needed.</p>',
+      <p>This compares the <i>bm_config_sync</i> private directory with the current installation UUIDs and displays where changes are needed.</p>',
     ];
 
     [$rows,$newRows] = $this->compareConfigs();
@@ -85,12 +84,21 @@ class ConfigSyncUUIDForm extends FormBase {
     $rows = [];
     $newRows = [];
     $config_factory = \Drupal::configFactory();
+    $directory_info = BMConfigSyncPathHelper::getDirectoryInfo();
+    if ($directory_info === NULL) {
+      Drupal::messenger()->addError($this->t('The UUID sync directory %directory could not be resolved. Verify that the private files system is configured and accessible.', ['%directory' => BMConfigSyncPathHelper::getConfiguredDirectory()]));
+      return [$rows, $newRows];
+    }
 
-    foreach (scandir(self::CONFIG_SYNC_UUID_PATH) as $file) {
+    if (!$this->assertDirectoryReady($directory_info['resolved'], $directory_info['configured'])) {
+      return [$rows, $newRows];
+    }
+
+    foreach (scandir($directory_info['resolved']) as $file) {
       if (pathinfo($file, PATHINFO_EXTENSION) === 'yml') {
         $config_name = pathinfo($file, PATHINFO_FILENAME);
 
-        $target_file = self::CONFIG_SYNC_UUID_PATH . "/$file";
+        $target_file = $directory_info['resolved'] . "/$file";
         $target_data = file_exists($target_file) ? Yaml::parseFile($target_file) : [];
         $target_uuid = $target_data['uuid'] ?? null;
 
@@ -185,10 +193,21 @@ class ConfigSyncUUIDForm extends FormBase {
    * Update the UUID of a configuration item.
    */
   private function updateConfigUuid(string $config_name): void {
-    $foreign_uuid_dir = self::CONFIG_SYNC_UUID_PATH;
+    $directory_info = BMConfigSyncPathHelper::getDirectoryInfo();
+    if ($directory_info === NULL) {
+      Drupal::messenger()->addError($this->t('The UUID sync directory %directory could not be resolved. Verify that the private files system is configured and accessible.', ['%directory' => BMConfigSyncPathHelper::getConfiguredDirectory()]));
+      return;
+    }
+
+    $foreign_uuid_dir = $directory_info['resolved'];
     $config_factory = \Drupal::configFactory();
 
     $target_file = "$foreign_uuid_dir/$config_name.yml";
+    if (!file_exists($target_file) || !is_readable($target_file)) {
+      Drupal::messenger()->addError($this->t('The UUID source file %file is missing or cannot be read.', ['%file' => $target_file]));
+      return;
+    }
+
     $target_data = Yaml::parseFile($target_file);
 
     if (!empty($target_data['uuid'])) {
@@ -196,6 +215,28 @@ class ConfigSyncUUIDForm extends FormBase {
       $config->set('uuid', $target_data['uuid'])->save();
       Drupal::messenger()->addMessage($this->t('Updated local config UUID: ' . $config_name));
     }
+  }
+
+  /**
+   * Ensures the UUID directory exists and is readable before use.
+   */
+  private function assertDirectoryReady(string $directory, ?string $display_directory = NULL): bool {
+    $display_directory = $display_directory ?? $directory;
+    if (!is_dir($directory)) {
+      Drupal::messenger()->addError($this->t('The UUID sync directory %directory does not exist.', ['%directory' => $display_directory]));
+      return FALSE;
+    }
+
+    if (!is_readable($directory)) {
+      Drupal::messenger()->addError($this->t('The UUID sync directory %directory is not readable.', ['%directory' => $display_directory]));
+      return FALSE;
+    }
+
+    if (!is_writable($directory)) {
+      Drupal::messenger()->addWarning($this->t('The UUID sync directory %directory is not writable. Synchronization may fail.', ['%directory' => $display_directory]));
+    }
+
+    return TRUE;
   }
 
   /**

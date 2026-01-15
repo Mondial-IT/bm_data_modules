@@ -1,12 +1,20 @@
 <?php
 function bm_config_sync_preprocess_page(array &$variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
 
-  if (\Drupal::routeMatch()->getRouteName() == 'system.batch_page.html') {
+  if ($route_name === 'system.batch_page.html') {
     // Check if we are on the batch process page
-    Drupal::logger('bm_config_sync')->debug('bm_config_sync.module line 6:'.\Drupal::routeMatch()->getRouteName());
+    Drupal::logger('bm_config_sync')->debug('bm_config_sync.module line 6:' . $route_name);
     // Attach the custom CSS and JS for the batch process page
     Drupal::logger('bm_config_sync')->debug('BM config sync: attaching');
     $variables['#attached']['library'][] = 'bm_config_sync/bm_config_sync.batch_css';
     $variables['#attached']['library'][] = 'bm_config_sync/bm_config_sync.batch_js';
   }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function bm_config_sync_page_attachments(array &$attachments): void {
+
 }

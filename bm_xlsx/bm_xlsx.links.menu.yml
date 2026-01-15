@@ -1,20 +1,41 @@
+# in bm_main menu
+bm_xlsx.bm_main_bluemarloc_data_help_topic:
+  title: 'Excel module'
+  description: 'About the excel module.'
+  route_name: help.help_topic
+  route_parameters:
+    module: bm_xlsx
+    id: bm_xlsx.overview
+  parent: bm_main.bluemarloc_data
+  weight: 12
+#
+bm_xlsx.help_topic:
+  title: 'Help topic'
+  description: 'About the excel module.'
+  route_name: help.help_topic
+  route_parameters:
+    module: bm_xlsx
+    id: bm_xlsx.overview
+  parent: bm_xlsx.bm_main_bluemarloc_data_help_topic
+  weight: 1
+#
 bm_xlsx.settings_form:
   title: 'bm_xlsx'
   description: 'Configure bm_xlsx.'
-  parent: bm_main.bluemarloc_data
+  parent: bm_xlsx.bm_main_bluemarloc_data_help_topic
   route_name: bm_xlsx.settings_form
-  weight: 1
+  weight: 2
 #
 bm_xlsx.settings_form_dev:
   title: 'Boilerplate'
   description: 'Elements.'
-  parent: bm_xlsx.settings_form
+  parent: bm_xlsx.bm_main_bluemarloc_data_help_topic
   route_name: bm_xlsx.settings_form
-  weight: 1
+  weight: 3
 #
 bm_xlsx.excel_upload_and_sheet_select_form:
   title: 'upload and sheet select form'
   description: 'Form element included in other pages'
-  parent: bm_xlsx.settings_form_dev
+  parent: bm_xlsx.bm_main_bluemarloc_data_help_topic
   route_name: bm_xlsx.excel_upload_and_sheet_select_form
-  weight: 1
+  weight: 4

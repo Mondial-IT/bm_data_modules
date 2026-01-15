@@ -8,22 +8,17 @@ namespace Drupal\bm_config_sync\Form;
 
 
 use Drupal;
-use Drupal\bm_config_sync\Controller\BMConfigSyncController;
 use Drupal\bm_config_sync\Handler\BMConfigSyncHandler;
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\Ajax\InvokeCommand;
-use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Config\ConfigImporter;
-use Drupal\Core\Config\FileStorage;
-use Drupal\Core\Config\StorageComparer;
-use Drupal\Core\File\FileSystem;
-use Drupal\Core\Form\FormBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Config\Config;
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Markup;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class BMTemplateForm for a Drupal settings form with AJAX table select functionality.
@@ -94,12 +89,15 @@ class BMConfigSyncCombinedERDForm extends FormBase {
 
   public string $exportedYML;
 
-  public BMConfigSyncHandler $configSyncHandler;
+  protected BMConfigSyncHandler $configSyncHandler;
 
-  private Drupal\Core\Config\Config $config;
+  private Config $config;
 
-  public function __construct() {
-
+  public static function create(ContainerInterface $container): self {
+    /** @var self $instance */
+    $instance = parent::create($container);
+    $instance->configSyncHandler = $container->get('bm_config_sync.handler');
+    return $instance;
   }
 
   /**
@@ -126,10 +124,10 @@ class BMConfigSyncCombinedERDForm extends FormBase {
    * Builds the settings form.
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    // Attach the bm_tippy tooltip library to the form.
-    $form['#attached']['library'][] = 'ziston/tippyjs';
-    $form['#attached']['library'][] = 'ziston/bm_tippyjs';
+    $form['#attached']['library'][] = 'bm_tooltip/tooltip';
     $form['#attached']['library'][] = 'bm_main/datatablesjs';
+    $form['#attached']['library'][] = 'bm_config_sync/bm_config_sync.admin_styles';
+    $form['#attributes']['class'][] = 'bm-config-sync-form';
 
     $this->ERD = [];
     $this->exportedYML = '';
@@ -142,39 +140,6 @@ class BMConfigSyncCombinedERDForm extends FormBase {
       '#suffix' => '</div>',
     ];
 
-
-    // Inject CSS styles directly into the page.
-    $form['custom_styles'] = [
-      '#type' => 'markup',
-      '#markup' => Markup::create('<style>
-         #id-selector-panel{
-            width: 800px;
-         }
-         #id-erd-panels{
-            margin-top: 30px;
-         }
-
-         .panel td,.panel th{
-            white-space: nowrap;
-            }
-        .ajax-response {
-            color: green;font-family:"monospace"; max-height:300px;overflow:auto;
-            }
-
-        .table-select-panel {
-            margin: 10px; border: 1px solid #ccc; padding: 15px;
-            }
-        .table-select-panel {
-            max-height:500px;overflow-y:auto;
-            }
-        .button-container button {
-            margin-right: 5px;
-            }
-        hr{
-            clear:both;
-            }
-      </style>'),
-    ];
 
     $form['intro'] = [
       '#markup' => '<p>Build Entity Relations Diagram table.</p>',
@@ -194,7 +159,7 @@ class BMConfigSyncCombinedERDForm extends FormBase {
         '#prefix' => Markup::create('<div id="id-selector-panel" class="panel panel-item-selector" >'
           . bm_main_panel_title_and_help(
             'DISPLAY ENTITY RELATIONS TABLES',
-            'Display the content type and its fields. Or click and select to filter the fields of the content type in the list below.'
+            'BMConfigSyncCombinedERDForm - Display the content type and its fields. Or click and select to filter the fields of the content type in the list below.'
           )),
         '#suffix' => '</div>',
       ];
@@ -273,7 +238,6 @@ class BMConfigSyncCombinedERDForm extends FormBase {
 
   private function columnSelector(&$form, $form_state): void {
 
-    $this->configSyncHandler = new BMConfigSyncHandler();
     // currently set column filter
     $displayedColumns = $this->config->get('displayed_columns') ?? ['id', 'field_name', 'label'];
 
@@ -641,7 +605,7 @@ class BMConfigSyncCombinedERDForm extends FormBase {
       // AJAX Response div for displaying processed rows.
       $form[self::PANEL_ERD]['response_4'] = [
         '#type' => 'container',
-        '#attributes' => ['id' => self::ID_AJAX_ERD_RESPONSE, 'class' => ['ajax-response-node-fields']],
+        '#attributes' => ['id' => self::ID_AJAX_ERD_RESPONSE, 'class' => ['ajax-response-node-fields', 'bm-config-sync-ajax-response']],
       ];
 
       // Export button for fields.

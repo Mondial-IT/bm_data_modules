@@ -1,0 +1,23 @@
+<?php
+
+use Drupal\bm_config_sync\Utility\BMConfigSyncPathHelper;
+
+/**
+ * Implements hook_install().
+ */
+function bm_config_sync_install(): void {
+  bm_config_sync_prepare_uuid_directory();
+}
+
+/**
+ * Helper to ensure the UUID sync directory exists.
+ */
+function bm_config_sync_prepare_uuid_directory(): void {
+  if (BMConfigSyncPathHelper::ensureConfiguredDirectoryExists()) {
+    return;
+  }
+
+  \Drupal::logger('bm_config_sync')->warning('Unable to create or access the configured UUID sync directory %directory. Review your file system permissions.', [
+    '%directory' => BMConfigSyncPathHelper::getConfiguredDirectory(),
+  ]);
+}

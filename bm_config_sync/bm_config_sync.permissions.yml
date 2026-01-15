@@ -1,0 +1,3 @@
+administer bm_config_sync configuration:
+  title: 'Administer Blue Marloc config sync tools'
+  description: 'Access the Blue Marloc configuration sync UI and JSON endpoints.'
