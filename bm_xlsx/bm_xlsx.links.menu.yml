@@ -20,8 +20,8 @@ bm_xlsx.help_topic:
   weight: 1
 #
 bm_xlsx.settings_form:
-  title: 'bm_xlsx'
-  description: 'Configure bm_xlsx.'
+  title: 'Settings'
+  description: 'Configure bm_xlsx Excel.'
   parent: bm_xlsx.bm_main_bluemarloc_data_help_topic
   route_name: bm_xlsx.settings_form
   weight: 2

@@ -8,3 +8,127 @@
 /*
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
  */
+
+.bm-xlsx-upload {
+  display: grid;
+  gap: 1rem;
+}
+
+.bm-xlsx-upload__panel {
+  border: 1px solid #d1d5db;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(17, 24, 39, 0.08);
+}
+
+.bm-xlsx-upload__panel-inner {
+  padding: 1rem 1.25rem 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bm-xlsx-upload__header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bm-xlsx-upload__status {
+  margin: 0;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.bm-xlsx-upload__status--muted {
+  font-weight: 400;
+  color: #475569;
+}
+
+.bm-xlsx-upload__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.bm-xlsx-upload__controls .form-item {
+  margin: 0;
+}
+
+.bm-xlsx-upload__source-toggle {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 220px;
+}
+
+.bm-xlsx-upload__summary {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bm-xlsx-upload__meta {
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bm-xlsx-upload__meta div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 0.5rem;
+}
+
+.bm-xlsx-upload__meta dt {
+  font-weight: 600;
+}
+
+.bm-xlsx-upload__meta dd {
+  margin: 0;
+}
+
+.bm-xlsx-upload__sheet-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bm-xlsx-upload__sheet-table th,
+.bm-xlsx-upload__sheet-table td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.bm-xlsx-upload__note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.bm-xlsx-upload__button {
+  background: linear-gradient(270deg, var(--bm-bluemarloc-purple), var(--bm-bluemarloc-blue));
+  background-size: 400% 400%;
+  animation: AnimationShift 30s ease infinite;
+  padding: 7px 20px !important;
+  border-radius: 9px;
+  box-shadow: 1px 1px 1px #d3d3d3;
+  color: white;
+  text-shadow: 0 1px #010101;
+  top: 6px;
+}
+
+.bm-xlsx-upload__button--secondary {
+  background: #e5e7eb;
+  color: #111827;
+  text-shadow: none;
+  box-shadow: none;
+  animation: none;
+}
+
+.bm-xlsx-upload__panel--preview {
+  overflow: hidden;
+}
+
+.bm-xlsx-upload__panel--preview .tableselect {
+  overflow: auto;
+}

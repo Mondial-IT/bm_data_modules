@@ -52,7 +52,7 @@ class Panel_excel_upload extends FormBase{
     $form['panel_excel_upload'] = [
       '#markup' => '<div id="panel-excel-upload" class="panel gap-20">' .
         bm_main_panel_title_and_help('Excel upload', 'The uploaded Excel to import').
-        'Fid: '.bm_main_get_last_uploaded_fid().':'.'File path: '.bm_main_get_last_uploaded_file_path()
+        'Fid: '.bm_xlsx_get_last_uploaded_fid().':'.'File path: '.bm_xlsx_get_last_uploaded_file_path()
     ];
 
   }

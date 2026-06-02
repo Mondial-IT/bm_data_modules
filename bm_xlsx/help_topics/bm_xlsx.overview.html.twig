@@ -5,15 +5,28 @@ top_level: true
 <h2>{% trans %}Upload and preview an Excel file{% endtrans %}</h2>
 <ol>
   <li>{% trans %}Go to <strong>Configuration → System → Excel module</strong> or visit <code>/admin/config/system/bm-xlsx/settings</code>.{% endtrans %}</li>
+  <li>{% trans %}Pick the source: select an Excel item from the Media Library or choose direct upload when you need to add a new file.{% endtrans %}</li>
   <li>{% trans %}Choose an <code>.xlsx</code> file from your computer and submit the form.{% endtrans %}</li>
-  <li>{% trans %}Select the worksheet you want to inspect. The preview displays the first rows with cell styling where available.{% endtrans %}</li>
+  <li>{% trans %}After upload or selection, review the sheet list and row counts, then select the worksheet you want to inspect. The preview displays the first rows with cell styling where available.{% endtrans %}</li>
+  <li>{% trans %}Use the <strong>Synchronize</strong> details panel when you need to convert legacy uploads into Media items.{% endtrans %}</li>
+</ol>
+
+<h2>{% trans %}Browse the Excel library{% endtrans %}</h2>
+<ol>
+  <li>{% trans %}Visit <code>/admin/content/media/excel</code> to browse only Excel media items.{% endtrans %}</li>
+  <li>{% trans %}Use the exposed filters to find files by name or minimum sheet/table/row counts.{% endtrans %}</li>
+  <li>{% trans %}Sort the sheet, table, and row columns to compare uploads quickly.{% endtrans %}</li>
 </ol>
 
 <h2>{% trans %}Share the data with other tools{% endtrans %}</h2>
 <ul>
   <li>{% trans %}The selection is cached, allowing import modules to reuse the chosen sheet without re-uploading the file.{% endtrans %}</li>
   <li>{% trans %}Use the color preview to confirm that important headers or warning rows remain styled in the source spreadsheet.{% endtrans %}</li>
+  <li>{% trans %}Prefer selecting an Excel item from the Media Library (bundle “Excel file”) so uploads stay managed and reusable across tools.{% endtrans %}</li>
+  <li>{% trans %}The form highlights the most recently uploaded file so users can confirm when a new upload replaces the last one.{% endtrans %}</li>
 </ul>
+<p>{% trans %}This module depends on Drupal core <code>media</code> and <code>media_library</code> so the Excel picker can list existing uploads.{% endtrans %}</p>
+<p>{% trans %}Each Excel Media item stores sheet metadata as Paragraphs entries (sheet name, optional table name, row count) and a short summary line for Media Library listings. The data refreshes whenever the file is updated or re-imported.{% endtrans %}</p>
 
 <h2>{% trans %}Design guidance for implementers{% endtrans %}</h2>
 <ul>
@@ -27,4 +40,6 @@ top_level: true
 <ul>
   <li>{% trans %}If the upload fails, verify that the file extension is <code>.xlsx</code> and the file size does not exceed the site limit.{% endtrans %}</li>
   <li>{% trans %}For corrupted files, download a fresh copy from the original source and try again.{% endtrans %}</li>
+  <li>{% trans %}If older uploads are missing from the picker, use “Synchronize Excel files” on the settings page to create Media items.{% endtrans %}</li>
+  <li>{% trans %}Hover the question-mark tooltip icons to see extra context about the current selection.{% endtrans %}</li>
 </ul>

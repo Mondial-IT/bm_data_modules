@@ -4,7 +4,520 @@
  Copyright (c) Mondial-IT BV - Blue Marloc 2024
    Created on 2024-11-21 at 11:32:11
  */
-require_once __DIR__ . '/vendor/autoload.php';
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\file\Entity\File;
+
+/**
+ * Create Media items for existing XLSX files.
+ *
+ * @param array|null $fids
+ *   Optional list of file IDs to migrate.
+ *
+ * @return int
+ *   Number of media items created.
+ */
+function bm_xlsx_import_excel_files_to_media(?array $fids = NULL): int {
+  if (!\Drupal::moduleHandler()->moduleExists('media')) {
+    return 0;
+  }
+  if (!\Drupal::moduleHandler()->moduleExists('file')) {
+    return 0;
+  }
+
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $type_storage = $entity_type_manager->getStorage('media_type');
+  if (!$type_storage->load('bm_xlsx_excel')) {
+    $media_type = \Drupal\media\Entity\MediaType::create([
+      'id' => 'bm_xlsx_excel',
+      'label' => 'Excel file',
+      'description' => 'Excel spreadsheet uploads for Blue Marloc tools.',
+      'source' => 'file',
+      'queue_thumbnail_downloads' => FALSE,
+      'new_revision' => TRUE,
+      'status' => TRUE,
+    ]);
+    $media_type->set('source_configuration', [
+      'source_field' => 'field_media_file',
+      'allowed_extensions' => 'xlsx',
+    ]);
+    $media_type->save();
+  }
+
+  $field_storage = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_media_file');
+  if (!$field_storage) {
+    $field_storage = \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_media_file',
+      'entity_type' => 'media',
+      'type' => 'file',
+      'cardinality' => 1,
+      'settings' => [
+        'uri_scheme' => 'public',
+      ],
+    ]);
+    $field_storage->save();
+  }
+
+  $field_config = \Drupal\field\Entity\FieldConfig::loadByName('media', 'bm_xlsx_excel', 'field_media_file');
+  if (!$field_config) {
+    $field_config = \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_media_file',
+      'entity_type' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'label' => 'Excel file',
+      'required' => TRUE,
+      'settings' => [
+        'file_extensions' => 'xlsx',
+      ],
+    ]);
+    $field_config->save();
+  }
+
+  $file_storage = $entity_type_manager->getStorage('file');
+  if ($fids === NULL) {
+    $fids = $file_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('filename', '%.xlsx', 'LIKE')
+      ->execute();
+  }
+
+  if (!$fids) {
+    return 0;
+  }
+
+  $media_storage = $entity_type_manager->getStorage('media');
+  $created = 0;
+
+  foreach ($file_storage->loadMultiple($fids) as $file) {
+    if (strtolower(pathinfo($file->getFilename(), PATHINFO_EXTENSION)) !== 'xlsx') {
+      continue;
+    }
+
+    $existing = $media_storage->getQuery()
+      ->accessCheck(FALSE)
+      ->condition('bundle', 'bm_xlsx_excel')
+      ->condition('field_media_file.target_id', $file->id())
+      ->range(0, 1)
+      ->execute();
+    $existing_id = $existing ? reset($existing) : NULL;
+
+    if ($file->isTemporary()) {
+      $file->setPermanent();
+      $file->save();
+    }
+
+    if ($existing_id) {
+      $media = $media_storage->load($existing_id);
+      if ($media) {
+        $updated = bm_xlsx_update_media_metadata($media, $file);
+        if ($updated) {
+          $media->save();
+        }
+      }
+    }
+    else {
+      $media = $media_storage->create([
+        'bundle' => 'bm_xlsx_excel',
+        'name' => $file->getFilename(),
+        'status' => 1,
+        'field_media_file' => [
+          'target_id' => $file->id(),
+        ],
+      ]);
+      bm_xlsx_update_media_metadata($media, $file);
+      $media->save();
+      $created++;
+    }
+  }
+
+  return $created;
+}
+
+/**
+ * Update Excel metadata fields before saving a media item.
+ */
+function bm_xlsx_entity_presave(EntityInterface $entity): void {
+  if (!$entity instanceof \Drupal\media\MediaInterface) {
+    return;
+  }
+  if ($entity->bundle() !== 'bm_xlsx_excel') {
+    return;
+  }
+  if (!$entity->hasField('field_media_file') || $entity->get('field_media_file')->isEmpty()) {
+    return;
+  }
+
+  $file = $entity->get('field_media_file')->entity;
+  if ($file instanceof File) {
+    bm_xlsx_update_media_metadata($entity, $file);
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function bm_xlsx_requirements($phase): array {
+  if ($phase !== 'runtime') {
+    return [];
+  }
+
+  if (!\Drupal::moduleHandler()->moduleExists('media')) {
+    return [];
+  }
+
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $file_storage = $entity_type_manager->getStorage('file');
+  $media_storage = $entity_type_manager->getStorage('media');
+  $file_system = \Drupal::service('file_system');
+
+  $fids = $file_storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('filename', '%.xlsx', 'LIKE')
+    ->execute();
+
+  $media_ids = $media_storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('bundle', 'bm_xlsx_excel')
+    ->execute();
+
+  $media_by_fid = [];
+  foreach ($media_storage->loadMultiple($media_ids) as $media) {
+    if (!$media->hasField('field_media_file') || $media->get('field_media_file')->isEmpty()) {
+      $media_by_fid['missing_file'][] = $media->id();
+      continue;
+    }
+    $fid = (int) $media->get('field_media_file')->target_id;
+    if ($fid) {
+      $media_by_fid[$fid][] = $media;
+    }
+  }
+
+  $needs_sync = FALSE;
+  foreach ($file_storage->loadMultiple($fids) as $file) {
+    $fid = (int) $file->id();
+    $realpath = $file_system->realpath($file->getFileUri());
+    if (!$realpath || !is_file($realpath)) {
+      $needs_sync = TRUE;
+      break;
+    }
+    if (empty($media_by_fid[$fid])) {
+      $needs_sync = TRUE;
+      break;
+    }
+    $disk_mtime = (int) (filemtime($realpath) ?: $file->getChangedTime());
+    foreach ($media_by_fid[$fid] as $media) {
+      if ($media->hasField('field_source_modified_timestamp')) {
+        $stored = (int) ($media->get('field_source_modified_timestamp')->value ?? 0);
+        if ($stored !== $disk_mtime) {
+          $needs_sync = TRUE;
+          break 2;
+        }
+      }
+    }
+  }
+
+  if (!$needs_sync && !empty($media_by_fid['missing_file'])) {
+    $needs_sync = TRUE;
+  }
+
+  if (!$needs_sync) {
+    $tracked_uris = [];
+    foreach ($file_storage->loadMultiple($fids) as $file) {
+      $tracked_uris[$file->getFileUri()] = TRUE;
+    }
+    $upload_directory = 'public://bm_xlsx';
+    $upload_realpath = $file_system->realpath($upload_directory);
+    if ($upload_realpath && is_dir($upload_realpath)) {
+      $iterator = new \RecursiveIteratorIterator(
+        new \RecursiveDirectoryIterator($upload_realpath, \FilesystemIterator::SKIP_DOTS)
+      );
+      foreach ($iterator as $entry) {
+        if (!$entry->isFile()) {
+          continue;
+        }
+        if (strtolower($entry->getExtension()) !== 'xlsx') {
+          continue;
+        }
+        $relative_path = str_replace($upload_realpath . DIRECTORY_SEPARATOR, '', $entry->getPathname());
+        $relative_path = str_replace(DIRECTORY_SEPARATOR, '/', $relative_path);
+        $uri = $upload_directory . '/' . $relative_path;
+        if (!isset($tracked_uris[$uri])) {
+          $needs_sync = TRUE;
+          break;
+        }
+      }
+    }
+  }
+
+  $link = \Drupal\Core\Link::fromTextAndUrl(
+    t('Excel settings page'),
+    \Drupal\Core\Url::fromRoute('bm_xlsx.settings_form')
+  )->toString();
+
+  if (!$needs_sync) {
+    return [
+      'bm_xlsx_sync' => [
+        'title' => t('bm_xlsx Excel status'),
+        'severity' => \Drupal\Core\Extension\Requirement\RequirementSeverity::Info,
+        'value' => t('Excel files are synchronized in the media library. See the @link for more information.', ['@link' => $link]),
+      ],
+    ];
+  }
+
+
+  return [
+    'bm_xlsx_sync' => [
+      'title' => t('Excel metadata synchronization'),
+      'severity' => \Drupal\Core\Extension\Requirement\RequirementSeverity::Warning,
+      'value' => t('Synchronisation is needed for one or more of your Excel files. To ensure the proper functioning of your site, you should run Excel synchronization as soon as possible. See the @link for more information.', ['@link' => $link]),
+    ],
+  ];
+}
+
+/**
+ * Implements hook_cron().
+ */
+function bm_xlsx_cron(): void {
+  bm_xlsx_sync_media_with_disk();
+}
+
+/**
+ * Sync Excel media entries with the public://bm_xlsx directory.
+ */
+function bm_xlsx_sync_media_with_disk(): void {
+  if (!\Drupal::moduleHandler()->moduleExists('media')) {
+    return;
+  }
+
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $file_storage = $entity_type_manager->getStorage('file');
+  $media_storage = $entity_type_manager->getStorage('media');
+  $file_system = \Drupal::service('file_system');
+
+  $upload_directory = 'public://bm_xlsx';
+  $upload_realpath = $file_system->realpath($upload_directory);
+  if (!$upload_realpath || !is_dir($upload_realpath)) {
+    return;
+  }
+
+  $disk_files = [];
+  $iterator = new \RecursiveIteratorIterator(
+    new \RecursiveDirectoryIterator($upload_realpath, \FilesystemIterator::SKIP_DOTS)
+  );
+  foreach ($iterator as $entry) {
+    if (!$entry->isFile()) {
+      continue;
+    }
+    if (strtolower($entry->getExtension()) !== 'xlsx') {
+      continue;
+    }
+    $relative_path = str_replace($upload_realpath . DIRECTORY_SEPARATOR, '', $entry->getPathname());
+    $relative_path = str_replace(DIRECTORY_SEPARATOR, '/', $relative_path);
+    $uri = $upload_directory . '/' . $relative_path;
+    $disk_files[$uri] = $entry->getMTime();
+  }
+
+  $file_ids = $file_storage->getQuery()
+    ->accessCheck(FALSE)
+    ->condition('uri', $upload_directory . '/%', 'LIKE')
+    ->execute();
+  $file_entities = $file_storage->loadMultiple($file_ids);
+
+  $file_by_uri = [];
+  foreach ($file_entities as $file) {
+    $file_by_uri[$file->getFileUri()] = $file;
+  }
+
+  $created_files = [];
+  $deleted_files = [];
+  $deleted_media = [];
+
+  foreach ($file_by_uri as $uri => $file) {
+    if (!isset($disk_files[$uri])) {
+      $media_ids = $media_storage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('bundle', 'bm_xlsx_excel')
+        ->condition('field_media_file.target_id', $file->id())
+        ->execute();
+      foreach ($media_storage->loadMultiple($media_ids) as $media) {
+        $deleted_media[] = (int) $media->id();
+        $media->delete();
+      }
+      $deleted_files[] = (int) $file->id();
+      $file->delete();
+    }
+  }
+
+  foreach ($disk_files as $uri => $mtime) {
+    if (!isset($file_by_uri[$uri])) {
+      $file = File::create([
+        'uri' => $uri,
+        'status' => 1,
+      ]);
+      $file->save();
+      $file_by_uri[$uri] = $file;
+      $created_files[] = (int) $file->id();
+    }
+  }
+
+  if ($file_by_uri) {
+    $fids = array_map(static fn(File $file): int => (int) $file->id(), $file_by_uri);
+    bm_xlsx_import_excel_files_to_media($fids);
+  }
+
+  if ($created_files || $deleted_files || $deleted_media) {
+    $logger = \Drupal::logger('bm_xlsx');
+    if ($created_files) {
+      $logger->notice('Excel sync created file entities: @ids', ['@ids' => implode(', ', $created_files)]);
+    }
+    if ($deleted_files) {
+      $logger->warning('Excel sync deleted file entities: @ids', ['@ids' => implode(', ', $deleted_files)]);
+    }
+    if ($deleted_media) {
+      $logger->warning('Excel sync deleted media entities: @ids', ['@ids' => implode(', ', $deleted_media)]);
+    }
+  }
+}
+
+/**
+ * Populate metadata fields for an Excel media item.
+ *
+ * @return bool
+ *   TRUE when updates were applied.
+ */
+function bm_xlsx_update_media_metadata(\Drupal\media\MediaInterface $media, File $file): bool {
+  $file_uri = $file->getFileUri();
+  $file_changed = $file->getChangedTime() ?: 0;
+  $has_summary = $media->hasField('field_bm_xlsx_summary')
+    && (string) ($media->get('field_bm_xlsx_summary')->value ?? '') !== '';
+  $has_entries = $media->hasField('field_bm_xlsx_metadata')
+    && !empty($media->get('field_bm_xlsx_metadata')->getValue());
+  if ($media->hasField('field_bm_xlsx_file_path')) {
+    $stored_path = (string) ($media->get('field_bm_xlsx_file_path')->value ?? '');
+    if ($stored_path !== $file_uri) {
+      $media->set('field_bm_xlsx_file_path', $file_uri);
+      $has_entries = FALSE;
+      $has_summary = FALSE;
+    }
+  }
+  if ($media->hasField('field_source_modified_timestamp')) {
+    $stored = (int) ($media->get('field_source_modified_timestamp')->value ?? 0);
+    if ($stored === $file_changed && $has_summary && $has_entries) {
+      return FALSE;
+    }
+  }
+
+  $metadata = bm_xlsx_extract_metadata_from_file($file);
+  if (!$metadata) {
+    return FALSE;
+  }
+
+  $updated = FALSE;
+  if ($media->hasField('field_bm_xlsx_summary')) {
+    $current = (string) ($media->get('field_bm_xlsx_summary')->value ?? '');
+    $current_format = (string) ($media->get('field_bm_xlsx_summary')->format ?? 'plain_text');
+    if ($current !== $metadata['summary'] || $current_format !== 'plain_text') {
+      $media->set('field_bm_xlsx_summary', [
+        'value' => $metadata['summary'],
+        'format' => 'plain_text',
+      ]);
+      $updated = TRUE;
+    }
+  }
+  if ($media->hasField('field_bm_xlsx_metadata')) {
+    $current_entries = [];
+    $existing_paragraphs = [];
+    foreach ($media->get('field_bm_xlsx_metadata')->referencedEntities() as $paragraph) {
+      $existing_paragraphs[] = $paragraph;
+      $current_entries[] = [
+        'sheetname' => (string) ($paragraph->get('field_bm_xlsx_sheetname')->value ?? ''),
+        'tablename' => (string) ($paragraph->get('field_bm_xlsx_tablename')->value ?? ''),
+        'rows' => (int) ($paragraph->get('field_bm_xlsx_row_count')->value ?? 0),
+      ];
+    }
+    if (json_encode($current_entries) !== json_encode($metadata['entries'])) {
+      $new_items = [];
+      foreach ($metadata['entries'] as $entry) {
+        $paragraph = \Drupal\paragraphs\Entity\Paragraph::create([
+          'type' => 'bm_xlsx_p_excel_metadata',
+          'field_bm_xlsx_sheetname' => $entry['sheetname'],
+          'field_bm_xlsx_tablename' => $entry['tablename'],
+          'field_bm_xlsx_row_count' => $entry['rows'],
+        ]);
+        $paragraph->save();
+        $new_items[] = [
+          'target_id' => $paragraph->id(),
+          'target_revision_id' => $paragraph->getRevisionId(),
+        ];
+      }
+      $media->set('field_bm_xlsx_metadata', $new_items);
+      foreach ($existing_paragraphs as $paragraph) {
+        $paragraph->delete();
+      }
+      $updated = TRUE;
+    }
+  }
+
+  if ($media->hasField('field_source_modified_timestamp')) {
+    $current_timestamp = (int) ($media->get('field_source_modified_timestamp')->value ?? 0);
+    if ($current_timestamp !== $file_changed) {
+      $media->set('field_source_modified_timestamp', $file_changed);
+      $updated = TRUE;
+    }
+  }
+  if ($media->hasField('field_bm_xlsx_file_path')) {
+    $current_path = (string) ($media->get('field_bm_xlsx_file_path')->value ?? '');
+    if ($current_path !== $file_uri) {
+      $media->set('field_bm_xlsx_file_path', $file_uri);
+      $updated = TRUE;
+    }
+  }
+
+  return $updated;
+}
+
+/**
+ * Extract sheet names and row counts from an Excel file.
+ *
+ * @return array|null
+ *   Sheet metadata payload, or NULL on failure.
+ */
+function bm_xlsx_extract_metadata_from_file(File $file): ?array {
+  $file_uri = $file->getFileUri();
+  if (!$file_uri) {
+    return NULL;
+  }
+
+  try {
+    $xlsx = new \Drupal\bm_xlsx\BMXLSX\BMXLSX($file_uri);
+    $sheet_names = $xlsx->getSheetNames() ?? [];
+    $simple = $xlsx->getXLSX();
+    $entries = [];
+    $summary_parts = [];
+    if ($simple) {
+      foreach ($sheet_names as $index => $sheet_name) {
+        $dimension = $simple->dimension((int) $index);
+        $rows = (int) ($dimension[1] ?? 0);
+        $entries[] = [
+          'sheetname' => $sheet_name,
+          'tablename' => '',
+          'rows' => $rows,
+        ];
+        $summary_parts[] = $sheet_name . ': ' . $rows . ' rows';
+      }
+    }
+
+    return [
+      'entries' => $entries,
+      'summary' => implode('; ', $summary_parts),
+    ];
+  }
+  catch (\Exception $e) {
+    Drupal::messenger()->addError($e->getMessage());
+    return NULL;
+  }
+}
+
 function bm_xlsx_help($route_name, $route_match): string {
   if ($route_name == 'help.page.bm_xlsx') {
     return
@@ -44,4 +557,27 @@ function bm_xlsx_theme(): array {
       'path' => $module_path . '/templates',
     ],
   ];
+}
+
+/**
+ * Function get the last uploaded fid from the bm_main configuration.
+ * @see XlsxUploadForm for example
+ *
+ * @return int|null
+ *   The file ID (fid) if available, otherwise NULL.
+ */
+function bm_xlsx_get_last_uploaded_fid(): ?int {
+  $config = Drupal::config('bm_main.settings');
+  $fid= $config->get('uploaded_file_fid') ?? NULL;
+  if(!is_numeric($fid)) {
+    return null;
+  }
+  return $fid;
+}
+
+function bm_xlsx_get_last_uploaded_file_path(): ?string {
+  // Retrieve saved FID and file path.
+  $fid = bm_xlsx_get_last_uploaded_fid();
+  $file = $fid ? File::load($fid) : NULL;
+  return $file?->getFileUri();
 }

@@ -6,3 +6,6 @@ core_version_requirement: ^11
 dependencies:
   - drupal:file
   - bm_main
+  - drupal:media
+  - drupal:media_library
+  - paragraphs:paragraphs

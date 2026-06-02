@@ -686,7 +686,7 @@ class BMImport {
     // get paragraph and taxonomy handlers
     // $this->loadSettingsYamlFile();
     //$this->load_system_settings_yml();
-    $fid = bm_main_get_last_uploaded_fid();
+    $fid = bm_xlsx_get_last_uploaded_fid();
     if ($fid) {
 
       Drupal::messenger()

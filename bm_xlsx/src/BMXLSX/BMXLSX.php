@@ -13,6 +13,7 @@ namespace Drupal\bm_xlsx\BMXLSX;
 
 use Drupal;
 use Drupal\Core\Config\Config;
+use Drupal\media\Entity\Media;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Url;
@@ -29,6 +30,7 @@ use Shuchkin\SimpleXLSXGen;
  * * getWorkSheets()
  */
 class BMXLSX {
+  private static bool $autoloaded = false;
   public ?string $fileUri;
   public ?int $fid;
   public ?int $sheet;
@@ -44,13 +46,26 @@ class BMXLSX {
    * @throws Exception
    */
   public function __construct(string|int $file_path_or_fid=0) {
+    if (!self::$autoloaded && !class_exists(SimpleXLSX::class)) {
+      $module_path = Drupal::service('extension.path.resolver')->getPath('module', 'bm_xlsx');
+      $simplexlsx_path = $module_path . '/vendor/shuchkin/simplexlsx/src/SimpleXLSX.php';
+      $simplexlsx_gen_path = $module_path . '/vendor/shuchkin/simplexlsx/src/SimpleXLSXGen.php';
+      if (is_file($simplexlsx_path)) {
+        require_once $simplexlsx_path;
+      }
+      if (is_file($simplexlsx_gen_path)) {
+        require_once $simplexlsx_gen_path;
+      }
+      self::$autoloaded = true;
+    }
     // is set by ExcelUploadAndSheetSelectForm
     // get a stored path, fid, limit and selected sheet.
     $config = self::get_config_sheet_selection_and_limit();
     $this->sheet = $config->sheet??0;
     $this->limit= $config->limit??100;
     $this->fileUri = $config->file_path??'';
-    $this->fid = $config->file_id??'0';
+    $this->fid = $config->fid??0;
+    $mediaId = $config->media_id ?? NULL;
 
     // not in cache, given a path?
     if(empty($this->fileUri) && !$this->fid) {
@@ -59,10 +74,32 @@ class BMXLSX {
       }
     }
     // not in cache, given a fid?
-    if(empty($this->fileUri && $this->fid)) {
+    if(empty($this->fileUri) && $this->fid) {
       $file = File::load($this->fid);
       if($file) {
         $this->fileUri = $file->getFileUri();
+      }
+    }
+
+    // If the incoming argument is a media id, resolve to file uri.
+    if (is_int($file_path_or_fid) && empty($this->fileUri) && empty($this->fid)) {
+      $media = Media::load($file_path_or_fid);
+      if ($media && $media->hasField('field_media_file') && !$media->get('field_media_file')->isEmpty()) {
+        $file = $media->get('field_media_file')->entity;
+        if ($file) {
+          $this->fid = (int) $file->id();
+          $this->fileUri = $file->getFileUri();
+        }
+      }
+    }
+    elseif ($mediaId) {
+      $media = Media::load($mediaId);
+      if ($media && $media->hasField('field_media_file') && !$media->get('field_media_file')->isEmpty()) {
+        $file = $media->get('field_media_file')->entity;
+        if ($file) {
+          $this->fid = (int) $file->id();
+          $this->fileUri = $file->getFileUri();
+        }
       }
     }
 
@@ -80,7 +117,7 @@ class BMXLSX {
       }
     }
     // cache this so it can be retrieved in Excel users
-    self::cache_config_sheet_selection_and_limit($this->sheet, $this->limit);
+    self::cache_config_sheet_selection_and_limit($this->sheet, $this->limit, $this->fid, $this->fileUri, $mediaId);
     return $this;
   }
 
@@ -249,26 +286,31 @@ class BMXLSX {
   }
   /**
    * * cache $sheet and $limit into bm_xlsx.settings
-   * * Retrieves fid and filepath from bm_main_get_last_uploaded_fid()
+   * * Retrieves fid and filepath from bm_xlsx_get_last_uploaded_fid()
    *
    * @param string $sheet
    * @param $limit
+   * @param int|null $fid
+   * @param string|null $file_path
    *
    * @return void
    */
-  static public function cache_config_sheet_selection_and_limit(string $sheet, $limit): void {
+  static public function cache_config_sheet_selection_and_limit(string $sheet, $limit, ?int $fid = NULL, ?string $file_path = NULL, ?int $media_id = NULL): void {
 
     $config = Drupal::cache('bluemarloc')->get('bm_xlsx.settings');
     if($config) {
       $existing_config = $config->data;
     }
-    $fid = bm_main_get_last_uploaded_fid();
-    if($fid) {
-    $file = File::load($fid);
-    if($file){
-      $existing_config['selected_fid'] = $file->id();
-      $existing_config['selected_file_path'] = $file->getFileUri();
+    $fid = $fid ?? bm_xlsx_get_last_uploaded_fid();
+    if ($fid) {
+      $file = File::load($fid);
+      if ($file) {
+        $existing_config['selected_fid'] = $file->id();
+        $existing_config['selected_file_path'] = $file_path ?? $file->getFileUri();
+      }
     }
+    if ($media_id) {
+      $existing_config['selected_media_id'] = $media_id;
     }
     $existing_config['selected_sheet'] = $sheet;
     $existing_config['selected_limit'] = $limit;
@@ -291,11 +333,13 @@ class BMXLSX {
       $settings->file_path =  $existing_config['selected_file_path']?? NULL;
       $settings->sheet= $existing_config['selected_sheet']?? NULL;
       $settings->limit= $existing_config['selected_limit'] ?? NULL;
+      $settings->media_id = $existing_config['selected_media_id'] ?? NULL;
     }else{
       $settings->sheet= 0;
       $settings->limit= 10;
       $settings->fid =  0;
       $settings->file_path =  '';
+      $settings->media_id = NULL;
     }
     return $settings;
   }

@@ -1,0 +1,515 @@
+<?php
+
+/**
+ * bm_xlsx install/update hooks.
+ *
+ * Creates the Excel media bundle and fields:
+ * - media bundle: bm_xlsx_excel with field_media_file (file)
+ * - media fields: field_bm_xlsx_summary (plain text summary),
+ *   field_bm_xlsx_metadata (paragraphs reference),
+ *   field_bm_xlsx_file_path (file URI)
+ * - paragraph bundle: bm_xlsx_p_excel_metadata with fields for sheet/table/row count
+ */
+
+/**
+ * @file
+ * Install hooks for the bm_xlsx module.
+ */
+
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Entity\EntityStorageException;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\media\Entity\MediaType;
+use Drupal\paragraphs\Entity\ParagraphsType;
+use Drupal\Core\Config\FileStorage;
+
+/**
+ * Implements hook_install().
+ */
+function bm_xlsx_install(): void {
+  try {
+    bm_xlsx_ensure_media_type();
+  } catch (InvalidPluginDefinitionException|PluginNotFoundException|EntityStorageException) {
+
+  }
+}
+
+/**
+ * Ensure media and media_library are enabled for the Excel picker.
+ * @throws EntityStorageException
+ * @throws InvalidPluginDefinitionException
+ * @throws PluginNotFoundException
+ */
+function bm_xlsx_update_9001(): void {
+  $module_installer = Drupal::service('module_installer');
+  $required = ['media', 'media_library'];
+  $missing = array_values(array_filter($required, static function (string $module): bool {
+    return !Drupal::moduleHandler()->moduleExists($module);
+  }));
+
+  if ($missing) {
+    $module_installer->install($missing);
+  }
+
+  bm_xlsx_ensure_media_type();
+}
+
+/**
+ * Migrate existing XLSX files into Media items.
+ */
+function bm_xlsx_update_9002(): void {
+  try {
+    bm_xlsx_ensure_media_type();
+  } catch (InvalidPluginDefinitionException|PluginNotFoundException|EntityStorageException) {
+
+  }
+  bm_xlsx_import_excel_files_to_media();
+}
+
+/**
+ * Ensure the Excel media form display has a file widget.
+ */
+function bm_xlsx_update_9003(): void {
+  try {
+    bm_xlsx_ensure_media_type();
+  } catch (InvalidPluginDefinitionException|PluginNotFoundException|EntityStorageException) {
+
+  }
+}
+
+/**
+ * Add Excel metadata fields to the media type.
+ */
+function bm_xlsx_update_9004(): void {
+  try {
+    bm_xlsx_ensure_media_type();
+  } catch (InvalidPluginDefinitionException|PluginNotFoundException|EntityStorageException) {
+
+  }
+}
+
+/**
+ * Add Paragraphs-based metadata fields to the Excel media type.
+ * @throws EntityStorageException
+ * @throws InvalidPluginDefinitionException
+ * @throws PluginNotFoundException
+ */
+function bm_xlsx_update_9005(): void {
+  bm_xlsx_ensure_media_type();
+}
+
+/**
+ * Install the Excel library view config if missing.
+ */
+function bm_xlsx_update_9006(): void {
+  $config = \Drupal::configFactory()->getEditable('views.view.bm_xlsx_excel_library');
+  if (!$config->isNew()) {
+    return;
+  }
+  $module_path = \Drupal::service('extension.path.resolver')->getPath('module', 'bm_xlsx');
+  $storage = new FileStorage($module_path . '/config/install');
+  $data = $storage->read('views.view.bm_xlsx_excel_library');
+  if ($data) {
+    $config->setData($data)->save();
+  }
+}
+
+/**
+ * Ensure the Excel media type exists for managed XLSX uploads.
+ * @throws EntityStorageException
+ * @throws InvalidPluginDefinitionException
+ * @throws PluginNotFoundException
+ */
+function bm_xlsx_ensure_media_type(): void {
+  if (!Drupal::moduleHandler()->moduleExists('media')) {
+    return;
+  }
+
+  $type_storage = Drupal::entityTypeManager()->getStorage('media_type');
+  $media_type = $type_storage->load('bm_xlsx_excel');
+  if (!$media_type) {
+    $media_type = MediaType::create([
+      'id' => 'bm_xlsx_excel',
+      'label' => 'Excel file',
+      'description' => 'Excel spreadsheet uploads for Blue Marloc tools.',
+      'source' => 'file',
+      'queue_thumbnail_downloads' => FALSE,
+      'new_revision' => TRUE,
+      'status' => TRUE,
+    ]);
+
+    $media_type->set('source_configuration', [
+      'source_field' => 'field_media_file',
+      'allowed_extensions' => 'xlsx',
+    ]);
+
+    $media_type->save();
+  }
+
+  if (!Drupal::moduleHandler()->moduleExists('file')) {
+    return;
+  }
+
+  $field_storage = FieldStorageConfig::loadByName('media', 'field_media_file');
+  if (!$field_storage) {
+    $field_storage = FieldStorageConfig::create([
+      'field_name' => 'field_media_file',
+      'entity_type' => 'media',
+      'type' => 'file',
+      'cardinality' => 1,
+      'settings' => [
+        'uri_scheme' => 'public',
+      ],
+    ]);
+    $field_storage->save();
+  }
+
+  $field_config = FieldConfig::loadByName('media', 'bm_xlsx_excel', 'field_media_file');
+  if (!$field_config) {
+    $field_config = FieldConfig::create([
+      'field_name' => 'field_media_file',
+      'entity_type' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'label' => 'Excel file',
+      'required' => TRUE,
+      'settings' => [
+        'file_extensions' => 'xlsx',
+      ],
+    ]);
+    $field_config->save();
+  }
+
+  if (!Drupal::moduleHandler()->moduleExists('paragraphs')) {
+    return;
+  }
+
+  $paragraph_type = ParagraphsType::load('bm_xlsx_p_excel_metadata');
+  if (!$paragraph_type) {
+    $paragraph_type = ParagraphsType::create([
+      'id' => 'bm_xlsx_p_excel_metadata',
+      'label' => 'Excel information',
+      'description' => 'Meta data for Excel files available in the Media library, consisting of sheet names, table names and number of rows.',
+    ]);
+    $paragraph_type->save();
+  }
+  $module_path = \Drupal::service('extension.path.resolver')->getPath('module', 'bm_xlsx');
+  $icon_source = $module_path . '/assets/excel.svg';
+  $icon_directory = 'public://bm_xlsx/icons';
+  $icon_uri = $icon_directory . '/excel.svg';
+  $file_system = \Drupal::service('file_system');
+  $file_system->prepareDirectory($icon_directory, \Drupal\Core\File\FileSystemInterface::CREATE_DIRECTORY | \Drupal\Core\File\FileSystemInterface::MODIFY_PERMISSIONS);
+  if (is_file($icon_source)) {
+    $file_system->copy($icon_source, $icon_uri, \Drupal\Core\File\FileSystemInterface::EXISTS_REPLACE);
+    $icon_file = \Drupal::entityTypeManager()->getStorage('file')->loadByProperties(['uri' => $icon_uri]);
+    $icon_file = $icon_file ? reset($icon_file) : NULL;
+    if (!$icon_file) {
+      $icon_file = \Drupal\file\Entity\File::create([
+        'uri' => $icon_uri,
+        'status' => 1,
+      ]);
+      $icon_file->save();
+    }
+    if ($icon_file) {
+      $paragraph_type->set('icon_uuid', $icon_file->uuid());
+      $paragraph_type->save();
+    }
+  }
+
+  $sheetname_storage = FieldStorageConfig::loadByName('paragraph', 'field_bm_xlsx_sheetname');
+  if (!$sheetname_storage) {
+    $sheetname_storage = FieldStorageConfig::create([
+      'field_name' => 'field_bm_xlsx_sheetname',
+      'entity_type' => 'paragraph',
+      'type' => 'string',
+      'cardinality' => 1,
+    ]);
+    $sheetname_storage->save();
+  }
+  $sheetname_config = FieldConfig::loadByName('paragraph', 'bm_xlsx_p_excel_metadata', 'field_bm_xlsx_sheetname');
+  if (!$sheetname_config) {
+    $sheetname_config = FieldConfig::create([
+      'field_name' => 'field_bm_xlsx_sheetname',
+      'entity_type' => 'paragraph',
+      'bundle' => 'bm_xlsx_p_excel_metadata',
+      'label' => 'Sheet name',
+      'description' => 'Worksheet name for this entry.',
+      'required' => TRUE,
+    ]);
+    $sheetname_config->save();
+  }
+
+  $tablename_storage = FieldStorageConfig::loadByName('paragraph', 'field_bm_xlsx_tablename');
+  if (!$tablename_storage) {
+    $tablename_storage = FieldStorageConfig::create([
+      'field_name' => 'field_bm_xlsx_tablename',
+      'entity_type' => 'paragraph',
+      'type' => 'string',
+      'cardinality' => 1,
+    ]);
+    $tablename_storage->save();
+  }
+  $tablename_config = FieldConfig::loadByName('paragraph', 'bm_xlsx_p_excel_metadata', 'field_bm_xlsx_tablename');
+  if (!$tablename_config) {
+    $tablename_config = FieldConfig::create([
+      'field_name' => 'field_bm_xlsx_tablename',
+      'entity_type' => 'paragraph',
+      'bundle' => 'bm_xlsx_p_excel_metadata',
+      'label' => 'Table name',
+      'description' => 'Optional table name within the sheet.',
+      'required' => FALSE,
+    ]);
+    $tablename_config->save();
+  }
+
+  $row_count_storage = FieldStorageConfig::loadByName('paragraph', 'field_bm_xlsx_row_count');
+  if (!$row_count_storage) {
+    $row_count_storage = FieldStorageConfig::create([
+      'field_name' => 'field_bm_xlsx_row_count',
+      'entity_type' => 'paragraph',
+      'type' => 'integer',
+      'cardinality' => 1,
+    ]);
+    $row_count_storage->save();
+  }
+  $row_count_config = FieldConfig::loadByName('paragraph', 'bm_xlsx_p_excel_metadata', 'field_bm_xlsx_row_count');
+  if (!$row_count_config) {
+    $row_count_config = FieldConfig::create([
+      'field_name' => 'field_bm_xlsx_row_count',
+      'entity_type' => 'paragraph',
+      'bundle' => 'bm_xlsx_p_excel_metadata',
+      'label' => 'Row count',
+      'description' => 'Row count for this sheet/table entry.',
+      'required' => FALSE,
+      'default_value' => [
+        ['value' => 0],
+      ],
+    ]);
+    $row_count_config->save();
+  }
+
+  $metadata_storage = FieldStorageConfig::loadByName('media', 'field_bm_xlsx_metadata');
+  if (!$metadata_storage) {
+    $metadata_storage = FieldStorageConfig::create([
+      'field_name' => 'field_bm_xlsx_metadata',
+      'entity_type' => 'media',
+      'type' => 'entity_reference_revisions',
+      'cardinality' => -1,
+      'settings' => [
+        'target_type' => 'paragraph',
+      ],
+    ]);
+    $metadata_storage->save();
+  }
+  $metadata_config = FieldConfig::loadByName('media', 'bm_xlsx_excel', 'field_bm_xlsx_metadata');
+  if (!$metadata_config) {
+    $metadata_config = FieldConfig::create([
+      'field_name' => 'field_bm_xlsx_metadata',
+      'entity_type' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'label' => 'Excel metadata',
+      'description' => 'Sheet information such as sheet names, table names and row count extracted from the Excel file.',
+      'required' => FALSE,
+      'settings' => [
+        'handler' => 'default:paragraph',
+        'handler_settings' => [
+          'target_bundles' => [
+            'bm_xlsx_p_excel_metadata' => 'bm_xlsx_p_excel_metadata',
+          ],
+        ],
+      ],
+    ]);
+    $metadata_config->save();
+  }
+  else {
+    $settings = $metadata_config->getSetting('handler_settings') ?? [];
+    $target_bundles = $settings['target_bundles'] ?? [];
+    $target_bundles = ['bm_xlsx_p_excel_metadata' => 'bm_xlsx_p_excel_metadata'];
+    $settings['target_bundles'] = $target_bundles;
+    $metadata_config->setSetting('handler_settings', $settings);
+    $metadata_config->save();
+  }
+
+  $summary_storage = FieldStorageConfig::loadByName('media', 'field_bm_xlsx_summary');
+  if (!$summary_storage) {
+    $summary_storage = FieldStorageConfig::create([
+      'field_name' => 'field_bm_xlsx_summary',
+      'entity_type' => 'media',
+      'type' => 'text_long',
+      'cardinality' => 1,
+    ]);
+    $summary_storage->save();
+  }
+  $summary_config = FieldConfig::loadByName('media', 'bm_xlsx_excel', 'field_bm_xlsx_summary');
+  if (!$summary_config) {
+    $summary_config = FieldConfig::create([
+      'field_name' => 'field_bm_xlsx_summary',
+      'entity_type' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'label' => 'Excel file summary',
+      'description' => 'Plain text summary for Media Library listings.',
+      'required' => FALSE,
+      'settings' => [
+        'allowed_formats' => ['plain_text'],
+      ],
+    ]);
+    $summary_config->save();
+  }
+
+  $file_path_storage = FieldStorageConfig::loadByName('media', 'field_bm_xlsx_file_path');
+  if (!$file_path_storage) {
+    $file_path_storage = FieldStorageConfig::create([
+      'field_name' => 'field_bm_xlsx_file_path',
+      'entity_type' => 'media',
+      'type' => 'string',
+      'cardinality' => 1,
+    ]);
+    $file_path_storage->save();
+  }
+  $file_path_config = FieldConfig::loadByName('media', 'bm_xlsx_excel', 'field_bm_xlsx_file_path');
+  if (!$file_path_config) {
+    $file_path_config = FieldConfig::create([
+      'field_name' => 'field_bm_xlsx_file_path',
+      'entity_type' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'label' => 'File path',
+      'description' => 'File URI for the Excel upload.',
+      'required' => FALSE,
+    ]);
+    $file_path_config->save();
+  }
+
+  $timestamp_storage = FieldStorageConfig::loadByName('media', 'field_source_modified_timestamp');
+  if (!$timestamp_storage) {
+    $timestamp_storage = FieldStorageConfig::create([
+      'field_name' => 'field_source_modified_timestamp',
+      'entity_type' => 'media',
+      'type' => 'integer',
+      'cardinality' => 1,
+    ]);
+    $timestamp_storage->save();
+  }
+  $timestamp_config = FieldConfig::loadByName('media', 'bm_xlsx_excel', 'field_source_modified_timestamp');
+  if (!$timestamp_config) {
+    $timestamp_config = FieldConfig::create([
+      'field_name' => 'field_source_modified_timestamp',
+      'entity_type' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'label' => 'Source modified timestamp',
+      'description' => 'Unix timestamp of the uploaded file modification time.',
+      'required' => FALSE,
+      'default_value' => [
+        ['value' => 0],
+      ],
+    ]);
+    $timestamp_config->save();
+  }
+
+  $form_display = EntityFormDisplay::load('media.bm_xlsx_excel.default');
+  if (!$form_display) {
+    $form_display = EntityFormDisplay::create([
+      'targetEntityType' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+  $form_display->setComponent('field_media_file', [
+    'type' => 'file_generic',
+    'weight' => 0,
+    'settings' => [
+      'progress_indicator' => 'throbber',
+    ],
+  ]);
+  $form_display->removeComponent('field_bm_xlsx_summary');
+  $form_display->removeComponent('field_bm_xlsx_metadata');
+  $form_display->removeComponent('field_bm_xlsx_file_path');
+  $form_display->removeComponent('field_source_modified_timestamp');
+  $form_display->save();
+
+  $view_display = EntityViewDisplay::load('media.bm_xlsx_excel.default');
+  if (!$view_display) {
+    $view_display = EntityViewDisplay::create([
+      'targetEntityType' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+  $view_display->setComponent('field_bm_xlsx_summary', [
+    'type' => 'text_default',
+    'label' => 'above',
+    'weight' => 5,
+  ]);
+  $view_display->setComponent('field_bm_xlsx_metadata', [
+    'type' => 'entity_reference_revisions_entity_view',
+    'label' => 'above',
+    'weight' => 6,
+  ]);
+  $view_display->setComponent('field_bm_xlsx_file_path', [
+    'type' => 'string',
+    'label' => 'above',
+    'weight' => 7,
+  ]);
+  $view_display->removeComponent('field_source_modified_timestamp');
+  $view_display->save();
+
+  $library_display = EntityViewDisplay::load('media.bm_xlsx_excel.media_library');
+  if (!$library_display) {
+    $library_display = EntityViewDisplay::create([
+      'targetEntityType' => 'media',
+      'bundle' => 'bm_xlsx_excel',
+      'mode' => 'media_library',
+      'status' => TRUE,
+    ]);
+  }
+  $library_display->setComponent('field_bm_xlsx_summary', [
+    'type' => 'text_default',
+    'label' => 'hidden',
+    'weight' => 5,
+  ]);
+  $library_display->setComponent('field_bm_xlsx_file_path', [
+    'type' => 'string',
+    'label' => 'hidden',
+    'weight' => 6,
+  ]);
+  $library_display->removeComponent('field_source_modified_timestamp');
+  $library_display->save();
+
+  $paragraph_form_display = EntityFormDisplay::load('paragraph.bm_xlsx_p_excel_metadata.default');
+  if (!$paragraph_form_display) {
+    $paragraph_form_display = EntityFormDisplay::create([
+      'targetEntityType' => 'paragraph',
+      'bundle' => 'bm_xlsx_p_excel_metadata',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+  $paragraph_form_display->setComponent('field_bm_xlsx_sheetname', [
+    'type' => 'string_textfield',
+    'weight' => 0,
+    'settings' => [
+      'size' => 60,
+      'placeholder' => 'Example: Sheet 1',
+    ],
+  ]);
+  $paragraph_form_display->setComponent('field_bm_xlsx_tablename', [
+    'type' => 'string_textfield',
+    'weight' => 1,
+    'settings' => [
+      'size' => 60,
+      'placeholder' => 'Optional table name',
+    ],
+  ]);
+  $paragraph_form_display->setComponent('field_bm_xlsx_row_count', [
+    'type' => 'number',
+    'weight' => 2,
+    'settings' => [
+      'placeholder' => 'Row count',
+    ],
+  ]);
+  $paragraph_form_display->save();
+}
